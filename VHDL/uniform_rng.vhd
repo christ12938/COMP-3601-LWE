@@ -22,58 +22,36 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity uniform_rng is
-    GENERIC (
-        rand_width : Integer);
     Port ( prime : in STD_LOGIC_vector (15 downto 0);
-           seed  : in STD_LOGIC_VECTOR ( 31 downto 0);
-           clk,reset   :in std_logic; 
+           seed  : in STD_LOGIC_VECTOR ( 31 downto 0);  -- initial LFSR state
+           clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
+           width        : in integer :=16;          -- log of prime which will be used to set the max map cap on the random number max : 2^width
            random_number : out STD_LOGIC_vector(15 downto 0));
 end;
 
 architecture Behavioral of uniform_rng is
-
---    component log is
---     Port ( input : in STD_LOGIC_vector(15 downto 0);
---            res : out integer range 0 to 15);
---     end component;
      
 signal rand : std_logic_vector(31 downto 0) := SEED;
 signal feedback : std_logic;
-signal generated_rand : std_logic_vector(rand_width downto 0) ; --initilise to 0 (smallet possilbe value=1)
+signal generated_rand : std_logic_vector(15 downto 0) ; --initilise to 0 (smallet possilbe value=1)
 signal generated_rand_int :integer;
 signal prime_int : integer;
 begin
     
-  feedback <= not((rand(0) xor rand(3)));
+  feedback <= not((rand(0) xor rand(3)));           -- TODO: replace this with primitive polynomial of degree 24 to have maximum length
   
-
---  get_log_of_prime : log
---  port map ( input   => prime,
---             res     => log_of_prime );
-
   -- uniform random number generation credit: https://hforsten.com/generating-normally-distributed-pseudorandom-numbers-on-a-fpga.html
   process(clk,reset)
   begin
       if reset = '1' then
         rand <= SEED;
-      elsif rising_edge(clk) then
+      elsif rising_edge(clk) and start_signal = '1' then
           rand <= feedback&rand(31 downto 1);
       end if;
   end process;
-
-    generated_rand <= rand(rand_width downto 0);
-    
-    generated_rand_int <= to_integer(unsigned(generated_rand));
+  
+    generated_rand_int <= to_integer(unsigned(rand(width downto 0)));
     prime_int <= to_integer(unsigned(prime));
 
     -- if random number > q: return random number -q

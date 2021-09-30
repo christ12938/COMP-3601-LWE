@@ -15,18 +15,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity log is
     Port ( input : in STD_LOGIC_vector(15 downto 0);
-           res : out integer range 0 to 15);
+           res : out integer range 0 to 15;
+           rng_start: out std_logic);   --start signal for random number generator
 end log;
 
 
@@ -42,8 +35,10 @@ begin
                 if (input(i) = '1' and flag = '0') then
                     res <= i;
                     flag := '1';
+                    rng_start <= '1';
                 end if;
                 
         end loop;
      end process;
+     
 end Behavioral;
