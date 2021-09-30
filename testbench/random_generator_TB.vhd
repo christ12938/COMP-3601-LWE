@@ -25,36 +25,49 @@ use IEEE.Numeric_Std.all;
 
 
 
-entity random_generator_TB is
-end entity random_generator_TB ;
+entity TB is
+end entity TB ;
 
-architecture bench of random_generator_TBb is
+architecture bench of TB is
 
 component uniform_rng
-      GENERIC (
-          rand_width : Integer);
+  
       Port ( prime : in STD_LOGIC_vector (15 downto 0);
              seed  : in STD_LOGIC_VECTOR ( 31 downto 0);
-             clk,reset   :in std_logic; 
+             clk,reset,start_signal   :in std_logic; 
+             width        :in integer;
              random_number : out STD_LOGIC_vector(15 downto 0));
   end component;
+  
+ component log 
+    port ( input: in std_logic_vector(15 downto 0);
+            res : out integer range 0 to 15;
+            rng_start: out std_logic);
+    end component;
+    
 
-  signal prime: STD_LOGIC_vector (14 downto 0);
-  signal seed: STD_LOGIC_VECTOR ( 31 downto 0);
-  signal clk,reset: std_logic;
+  signal prime: STD_LOGIC_vector (15 downto 0):= "0000001111111111";
+  signal seed: STD_LOGIC_VECTOR ( 31 downto 0):= x"ABCDE111";
+  signal clk,reset,rng_start: std_logic :='0';
   signal random_number: STD_LOGIC_vector(15 downto 0);
+  signal log_res :  integer range 0 to 15;
 
-  constant clock_period: time := 10 ns;
+  constant clock_period: time := 1 ns;
   signal stop_the_clock: boolean;
 
 begin
 
-  -- Insert values for generic parameters !!
-  uut: uniform_rng generic map ( rand_width    => 5  )
-                      port map ( prime         => prime,
+
+   get_log : log port map ( input => prime,
+                            res => log_res,
+                            rng_start => rng_start);
+
+  uut: uniform_rng  port map ( prime         => prime,
                                  seed          => seed,
                                  clk           => clk,
                                  reset         => reset,
+                                 start_signal  => rng_start,
+                                 width         => log_res,
                                  random_number => random_number );
 
   stimulus: process
@@ -65,7 +78,7 @@ begin
     reset <= '1';
     wait for 5 ns;
     reset <= '0';
-    wait for 100 ns;
+    wait for 1000 ns;
 
     -- Put test bench stimulus code here
 
