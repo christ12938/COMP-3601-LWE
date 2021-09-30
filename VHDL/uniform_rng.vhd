@@ -35,20 +35,19 @@ entity uniform_rng is
     GENERIC (
         rand_width : Integer);
     Port ( prime : in STD_LOGIC_vector (15 downto 0);
-           seed  : in STD_LOGIC_VECTOR ( 30 downto 0);
-           clk   : std_logic; 
-           reset : std_logic;
+           seed  : in STD_LOGIC_VECTOR ( 31 downto 0);
+           clk,reset   :in std_logic; 
            random_number : out STD_LOGIC_vector(15 downto 0));
-end uniform_rng;
+end;
 
 architecture Behavioral of uniform_rng is
 
-    component log is
-     Port ( input : in STD_LOGIC_vector(15 downto 0);
-            res : out integer range 0 to 15);
-     end component;
+--    component log is
+--     Port ( input : in STD_LOGIC_vector(15 downto 0);
+--            res : out integer range 0 to 15);
+--     end component;
      
-signal rand : std_logic_vector(30 downto 0) := SEED;
+signal rand : std_logic_vector(31 downto 0) := SEED;
 signal feedback : std_logic;
 signal generated_rand : std_logic_vector(rand_width downto 0) ; --initilise to 0 (smallet possilbe value=1)
 signal generated_rand_int :integer;
@@ -68,7 +67,7 @@ begin
       if reset = '1' then
         rand <= SEED;
       elsif rising_edge(clk) then
-          rand <= feedback&rand(30 downto 1);
+          rand <= feedback&rand(31 downto 1);
       end if;
   end process;
 
