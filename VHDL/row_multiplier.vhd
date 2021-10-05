@@ -65,11 +65,11 @@ architecture behave of example_generic is
   signal r_CLK_TB : std_logic := '0';
 --  type t_Row_Mat is array (0 to g_IMAGE_COLS-1) of integer range 0 to 99;
 --  type t_Row_Sec is array (0 to g_IMAGE_COLS-1) of integer range 0 to 99;
-  signal A : myVector(0 to g_IMAGE_ROWS-1):= ((TO_UNSIGNED(30,g_Bits),TO_UNSIGNED(45,g_Bits),TO_UNSIGNED(75,g_Bits),TO_UNSIGNED(43,g_Bits)),(TO_UNSIGNED(62,g_Bits),TO_UNSIGNED(73,g_Bits),TO_UNSIGNED(43,g_Bits),TO_UNSIGNED(24,g_Bits)),(TO_UNSIGNED(64,g_Bits),TO_UNSIGNED(25,g_Bits),TO_UNSIGNED(30,g_Bits),TO_UNSIGNED(11,g_Bits)),(TO_UNSIGNED(0,g_Bits),TO_UNSIGNED(27,g_Bits),TO_UNSIGNED(74,g_Bits),TO_UNSIGNED(78,g_Bits)),(TO_UNSIGNED(48,g_Bits),TO_UNSIGNED(78,g_Bits),TO_UNSIGNED(41,g_Bits),TO_UNSIGNED(25,g_Bits)),(TO_UNSIGNED(29,g_Bits),TO_UNSIGNED(34,g_Bits),TO_UNSIGNED(13,g_Bits),TO_UNSIGNED(38,g_Bits)),(TO_UNSIGNED(19,g_Bits),TO_UNSIGNED(60,g_Bits),TO_UNSIGNED(17,g_Bits),TO_UNSIGNED(28,g_Bits)),(TO_UNSIGNED(52,g_Bits),TO_UNSIGNED(74,g_Bits),TO_UNSIGNED(12,g_Bits),TO_UNSIGNED(24,g_Bits)));
+  signal A : myVector(0 to a_height-1):= ((TO_UNSIGNED(30, mul_bits),TO_UNSIGNED(45, mul_bits),TO_UNSIGNED(75, mul_bits),TO_UNSIGNED(43, mul_bits)),(TO_UNSIGNED(62, mul_bits),TO_UNSIGNED(73, mul_bits),TO_UNSIGNED(43, mul_bits),TO_UNSIGNED(24, mul_bits)),(TO_UNSIGNED(64, mul_bits),TO_UNSIGNED(25, mul_bits),TO_UNSIGNED(30, mul_bits),TO_UNSIGNED(11, mul_bits)),(TO_UNSIGNED(0, mul_bits),TO_UNSIGNED(27, mul_bits),TO_UNSIGNED(74, mul_bits),TO_UNSIGNED(78, mul_bits)),(TO_UNSIGNED(48, mul_bits),TO_UNSIGNED(78, mul_bits),TO_UNSIGNED(41, mul_bits),TO_UNSIGNED(25, mul_bits)),(TO_UNSIGNED(29, mul_bits),TO_UNSIGNED(34, mul_bits),TO_UNSIGNED(13, mul_bits),TO_UNSIGNED(38, mul_bits)),(TO_UNSIGNED(19, mul_bits),TO_UNSIGNED(60, mul_bits),TO_UNSIGNED(17, mul_bits),TO_UNSIGNED(28, mul_bits)),(TO_UNSIGNED(52, mul_bits),TO_UNSIGNED(74, mul_bits),TO_UNSIGNED(12, mul_bits),TO_UNSIGNED(24, mul_bits)));
   --signal a : myVector(0 to g_IMAGE_ROWS-1) := ((1,1,1,1),(1,1,1,1),(1,1,1,1),(1,1,1,1),(1,1,1,1),(1,1,1,1),(1,1,1,1),(1,1,1,1));
-  signal S :  A_t(0 to g_IMAGE_COLS-1):=(TO_UNSIGNED(27,g_Bits),TO_UNSIGNED(58,g_Bits),TO_UNSIGNED(8,g_Bits),TO_UNSIGNED(2,g_Bits));
---  signal sum : unsigned(g_Bits-1 downto 0) := TO_UNSIGNED(0,g_Bits);
-  signal sum : a_t(0 to g_IMAGE_ROWS-1) := ( others => TO_UNSIGNED(0,g_Bits));
+  signal S :  array_mul_t(0 to a_width-1):=(TO_UNSIGNED(27, mul_bits),TO_UNSIGNED(58, mul_bits),TO_UNSIGNED(8, mul_bits),TO_UNSIGNED(2, mul_bits));
+--  signal sum : unsigned( mul_bits-1 downto 0) := TO_UNSIGNED(0, mul_bits);
+  signal sum : array_mul_t(0 to a_height-1) := ( others => TO_UNSIGNED(0, mul_bits));
   signal over : std_logic := '0';
 --  signal sum : natural range 0 to g_IMAGE_ROWS := 0;
 --  signal product : natural range 0 to g_IMAGE_ROWS := 0;
@@ -90,8 +90,8 @@ architecture behave of example_generic is
   component matrixMul is
     Port ( clk : in STD_LOGIC;
             A : in myVector;
-            S : in a_t;
-           result : out a_t;
+            S : in array_mul_t;
+           result : out array_mul_t;
            done : out STD_LOGIC);
   end component;
 begin
