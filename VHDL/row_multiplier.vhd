@@ -53,7 +53,7 @@ use ieee.numeric_std.all;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.dataTypes.all;
+use work.data_types.all;
 entity example_generic is
 
 end example_generic;
