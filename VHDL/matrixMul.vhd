@@ -1,27 +1,27 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 02.10.2021 12:28:56
--- Design Name: 
+-- Design Name:
 -- Module Name: matrixMul - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.my_pkg.all;
+use work.data_types.all;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
@@ -68,7 +68,7 @@ rowMultiplier: rowMul
     );
 calculation : process(clk)
 variable count : integer := 0;
-begin 
+begin
     if count < g_IMAGE_ROWS then
         row <= A(count);
     end if;
