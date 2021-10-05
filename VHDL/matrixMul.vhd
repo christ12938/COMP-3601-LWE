@@ -74,7 +74,7 @@ begin
     end if;
     if rising_edge(clk) then
         if count = g_IMAGE_ROWS then
-            result(count-1) <= TO_INTEGER(tempProduct);
+            result(count-1) <= tempProduct;
             done <= '1';
             multiply <= '1';
             --result <= internalResult;
@@ -88,7 +88,7 @@ begin
             done <= '0';
             count := count + 1;
         else
-            result(count-1) <= TO_INTEGER(tempProduct);
+            result(count-1) <= tempProduct;
             count := count + 1;
             --row <= A(count);
         end if;

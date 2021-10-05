@@ -54,10 +54,10 @@ begin
       productTemp := TO_UNSIGNED(0,g_Bits);
       sumTemp := TO_UNSIGNED(0,g_Bits);
       for ii in 0 to (g_IMAGE_COLS - 1) loop
-        productTemp := TO_UNSIGNED(A(ii) * S(ii),g_Bits);
+        productTemp := TO_UNSIGNED(TO_INTEGER(A(ii)) * TO_INTEGER(S(ii)),g_Bits);
 --        productTemp := A(ii)*S(ii);
         sumTemp := sumTemp + productTemp;
-        report ("COL = "  & natural'image(ii) & " A(ii)="& natural'image(A(ii)) & " S(ii)="& natural'image(S(ii)) &
+        report ("COL = "  & natural'image(ii) & " A(ii)="& integer'image(TO_INTEGER(A(ii))) & " S(ii)="& integer'image(TO_INTEGER(S(ii))) &
                 " SUM = " & integer'image(TO_INTEGER(sumTemp)) & " PRODUCT = " & integer'image(TO_INTEGER(productTemp))) severity note;
       end loop;
       result <= sumTemp;
