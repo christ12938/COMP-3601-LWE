@@ -47,9 +47,6 @@ component uniform_rng
     
   component error_generator   
      Port ( max_cap : in integer;
-          
-          -- min_cap : in integer;    -- assuming that min cap is -map cap
-           height : in integer;
            clk,reset,start_signal   :in std_logic;
            error    : out integer);
     end component;
@@ -79,7 +76,6 @@ begin
                                  random_number => random_number );
                                  
    erro: error_generator port map  ( max_cap =>5,
-                                    height =>3,
                                     clk => clk,
                                     reset => reset,
                                     start_signal => rng_start,
@@ -87,8 +83,7 @@ begin
    
 
   stimulus: process
-  begin
-  
+  begin  
     -- Put initialisation code here
 
     reset <= '1';
