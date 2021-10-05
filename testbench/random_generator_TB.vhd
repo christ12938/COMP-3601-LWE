@@ -45,13 +45,18 @@ component uniform_rng
             rng_start: out std_logic);
     end component;
     
+  component error_generator   
+     Port ( max_cap : in integer;
+           clk,reset,start_signal   :in std_logic;
+           error    : out integer);
+    end component;
 
   signal prime: STD_LOGIC_vector (15 downto 0):= "0000001111111111";
   signal seed: STD_LOGIC_VECTOR ( 31 downto 0):= x"ABCDE111";
   signal clk,reset,rng_start: std_logic :='0';
   signal random_number: STD_LOGIC_vector(15 downto 0);
   signal log_res :  integer range 0 to 15;
-
+  signal error: integer;
   constant clock_period: time := 1 ns;
   signal stop_the_clock: boolean;
 
@@ -69,10 +74,16 @@ begin
                                  start_signal  => rng_start,
                                  width         => log_res,
                                  random_number => random_number );
+                                 
+   erro: error_generator port map  ( max_cap =>5,
+                                    clk => clk,
+                                    reset => reset,
+                                    start_signal => rng_start,
+                                    error => error);                          
+   
 
   stimulus: process
-  begin
-  
+  begin  
     -- Put initialisation code here
 
     reset <= '1';
