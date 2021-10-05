@@ -1,21 +1,21 @@
 ------------------------------------------------------------------------------------
----- Company: 
----- Engineer: 
----- 
+---- Company:
+---- Engineer:
+----
 ---- Create Date: 24.09.2021 16:44:16
----- Design Name: 
+---- Design Name:
 ---- Module Name: row_multiplier - Behavioral
----- Project Name: 
----- Target Devices: 
----- Tool Versions: 
----- Description: 
----- 
----- Dependencies: 
----- 
+---- Project Name:
+---- Target Devices:
+---- Tool Versions:
+---- Description:
+----
+---- Dependencies:
+----
 ---- Revision:
 ---- Revision 0.01 - File Created
 ---- Additional Comments:
----- 
+----
 ------------------------------------------------------------------------------------
 
 
@@ -47,28 +47,21 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package my_pkg is
-  constant g_IMAGE_ROWS : natural := 8;
-  constant g_IMAGE_COLS : natural := 4;
-  constant g_Bits : natural := 32;
-  type a_t is array(natural range <>) of integer;
-  type myMatrix is array(natural range <>, natural range <>) of integer;
-  type myVector is array(natural range <>) of a_t(0 to g_IMAGE_COLS-1);
-end package my_pkg;
+
 
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.my_pkg.all;
+use work.dataTypes.all;
 entity example_generic is
-  
+
 end example_generic;
- 
+
 architecture behave of example_generic is
- 
+
   constant c_CLK_PERIOD : time := 10 ns;  -- 100 MHz
- 
+
   signal r_CLK_TB : std_logic := '0';
 --  type t_Row_Mat is array (0 to g_IMAGE_COLS-1) of integer range 0 to 99;
 --  type t_Row_Sec is array (0 to g_IMAGE_COLS-1) of integer range 0 to 99;
@@ -102,16 +95,16 @@ architecture behave of example_generic is
            done : out STD_LOGIC);
   end component;
 begin
- 
+
   -- Generates a clock that is used by this example, NOT synthesizable
   p_CLK : process
   begin
     r_CLK_TB <= not(r_CLK_TB);
     wait for c_CLK_PERIOD/2;
   end process p_CLK;
-   
- 
-  
+
+
+
 --    rowMultiplier: rowMul
 --    generic map(
 --    	g_IMAGE_ROWS => g_IMAGE_ROWS,
@@ -135,7 +128,7 @@ begin
     result => sum,
     done => over
     );
- 
-  
-   
+
+
+
 end behave;
