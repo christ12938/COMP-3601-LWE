@@ -34,28 +34,23 @@ use IEEE.NUMERIC_STD.ALL;
 entity matrixMul is
     Port ( clk : in STD_LOGIC;
             A : in myVector;
-            S : in a_t;
-           result : out a_t;
+            S : in array_mul_t;
+           result : out array_mul_t;
            done : out STD_LOGIC);
 end matrixMul;
 
 architecture Behavioral of matrixMul is
 component rowMul is
---  generic (
---		g_IMAGE_ROWS : natural := 2;
---		g_IMAGE_COLS : natural := 2;
---		g_Bits : natural := 32
---		);
     port( clk : in STD_LOGIC;
-           A : in a_t;
-           S : in a_t;
+           A : in array_mul_t;
+           S : in array_mul_t;
            multiply : in std_logic;
            result : out unsigned);
   end component;
   --signal count : integer := 0;
-  signal tempProduct : unsigned(g_Bits-1 downto 0) := TO_UNSIGNED(0,g_Bits);
+  signal tempProduct : unsigned(mul_bits - 1 downto 0) := TO_UNSIGNED(0, mul_bits);
   --signal tempProduct : integer := 0;
-  signal row : a_t(0 to g_IMAGE_COLS-1);
+  signal row : array_mul_t(0 to a_width - 1);
   signal multiply : std_logic := '0';
 begin
 rowMultiplier: rowMul
@@ -69,11 +64,11 @@ rowMultiplier: rowMul
 calculation : process(clk)
 variable count : integer := 0;
 begin
-    if count < g_IMAGE_ROWS then
+    if count < a_height then
         row <= A(count);
     end if;
     if rising_edge(clk) then
-        if count = g_IMAGE_ROWS then
+        if count = a_height then
             result(count-1) <= tempProduct;
             done <= '1';
             multiply <= '1';

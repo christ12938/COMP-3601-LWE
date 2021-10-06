@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 29.03.2021 22:35:26
--- Design Name: 
+-- Design Name:
 -- Module Name: register - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -26,7 +26,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- n-bit register with synchronous reset and enable
 ENTITY regne IS
-	GENERIC ( N : INTEGER := 8 ) ;
+	GENERIC ( N : POSITIVE := 8 ) ;
 	PORT(	D 			: IN 		STD_LOGIC_VECTOR(N-1 DOWNTO 0);
 			E		 	: IN 		STD_LOGIC ;
 			Resetn	: IN		STD_LOGIC;

@@ -29,14 +29,12 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity rowMul is
---	generic (
---		g_IMAGE_ROWS : natural := 2;
---		g_IMAGE_COLS : natural := 2;
---		g_Bits : natural := 32
---		);
+	generic (
+		mul_bits : natural := mul_bits
+		);
 	Port ( clk : in STD_LOGIC;
-           A : in a_t;
-           S : in a_t;
+           A : in array_mul_t;
+           S : in array_mul_t;
            multiply : in std_logic;
            result : out unsigned);
 end rowMul;
@@ -45,16 +43,16 @@ architecture Behavioral of rowMul is
 
 begin
  p_IMAGE : process(clk)
-    variable productTemp : unsigned(31 downto 0) := TO_UNSIGNED(0,g_Bits);
-    variable sumTemp : unsigned (31 downto 0)  := TO_UNSIGNED(0,g_Bits);
+    variable productTemp : unsigned( mul_bits - 1 downto 0) := TO_UNSIGNED(0, mul_bits);
+    variable sumTemp : unsigned ( mul_bits - 1 downto 0)  := TO_UNSIGNED(0, mul_bits);
 --    variable productTemp : integer := 0;
 --    variable sumTemp : integer := 0;
   begin
     if rising_edge(clk) and multiply = '0' then
-      productTemp := TO_UNSIGNED(0,g_Bits);
-      sumTemp := TO_UNSIGNED(0,g_Bits);
-      for ii in 0 to (g_IMAGE_COLS - 1) loop
-        productTemp := TO_UNSIGNED(TO_INTEGER(A(ii)) * TO_INTEGER(S(ii)),g_Bits);
+      productTemp := TO_UNSIGNED(0, mul_bits);
+      sumTemp := TO_UNSIGNED(0, mul_bits);
+      for ii in 0 to (a_width - 1) loop
+        productTemp := TO_UNSIGNED(TO_INTEGER(A(ii)) * TO_INTEGER(S(ii)), mul_bits);
 --        productTemp := A(ii)*S(ii);
         sumTemp := sumTemp + productTemp;
         report ("COL = "  & natural'image(ii) & " A(ii)="& integer'image(TO_INTEGER(A(ii))) & " S(ii)="& integer'image(TO_INTEGER(S(ii))) &
