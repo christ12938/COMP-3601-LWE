@@ -1,12 +1,10 @@
-/*
-	Learning with error encryptor and decryptor
-	COMP3601 21T3
-	Team Grey:
-		Chris
-		Dong
-		Farnaz
-		Tirth
-*/
+--	Learning with error encryptor and decryptor
+--	COMP3601 21T3
+--	Team Grey:
+--		Chris
+--		Dong
+--		Farnaz
+--		Tirth
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -21,11 +19,11 @@ entity lwe is
 
 		-- Encryption
 		byte_in : in std_logic_vector(7 downto 0);
-		u_out : out array_unsigned(0 to u_height - 1)(n_bits - 1 downto 0);
+		u_out : out array_t(0 to u_height - 1);
 		v_out : out unsigned(n_bits - 1 downto 0);
 
 		-- Decryption
-		u_in : in array_unsigned(0 to u_height - 1)(n_bits - 1 downto 0);
+		u_in : in array_t(0 to u_height - 1);
 		v_in : in unsigned(n_bits - 1 downto 0);
 		byte_out : out std_logic_vector(7 downto 0)
 	);
@@ -33,10 +31,6 @@ entity lwe is
 end entity;
 
 architecture behavioural of lwe is
-	/* -------------------------------------------------------------------------- */
-	/*                                 Components                                 */
-	/* -------------------------------------------------------------------------- */
-
 	-- Block RAM for storing matrix A in configuration 3
 	component a_bram_config_3 is
 		port (
@@ -65,21 +59,14 @@ architecture behavioural of lwe is
 		);
 	end component;
 
-	/* -------------------------------------------------------------------------- */
-	/*                                   Signals                                  */
-	/* -------------------------------------------------------------------------- */
-
-	/* ----------------------- Signals for the q registers ---------------------- */
 	signal q_in : unsigned(n_bits - 1 downto 0);
 	signal q_out : unsigned(n_bits - 1 downto 0);
 	signal q_enable : std_logic;
 
-	/* ----------------------- Signals for the s register ----------------------- */
-	signal s_in : array_unsigned(0 to s_height - 1)(n_bits - 1 downto 0);
-	signal s_out : array_unsigned(0 to s_height - 1)(n_bits - 1 downto 0);
+	signal s_in : array_t(0 to s_height - 1);
+	signal s_out : array_t(0 to s_height - 1);
 	signal s_enable : std_logic;
 
-	/* ------------------- Signals for the matrix A block ram ------------------- */
 	signal a_bram_data_in : unsigned(a_bram_data_width - 1 downto 0);
 	signal a_bram_data_out : unsigned(a_bram_data_width - 1 downto 0);
 	signal a_bram_address : unsigned(a_bram_address_width - 1 downto 0);
@@ -110,9 +97,6 @@ begin
 		);
 	end generate;
 
-	/* -------------------------------------------------------------------------- */
-	/*                            Block RAM Generation                            */
-	/* -------------------------------------------------------------------------- */
 	-- This section uses an if generate because the block RAM was generated via the Vivado UI, so the block RAM VHDL implementation isn't available
 	-- Block RAM for matrix A in configuration 1
 	a_bram_config_1_generate : if (CONFIG = 1) generate
@@ -132,3 +116,22 @@ begin
 		);
 	end generate;
 end behavioural;
+
+
+
+-- port (
+-- 	INPUTS
+-- 	clock (bit)
+-- 	resetn? (bit)
+-- 	data_in_a (array_t) from block ram
+-- 	start (bit)
+-- 	data_in_b (array_t)
+
+-- 	message (bit)
+
+-- 	OUTPUTS
+-- 	u (array_t) v (unsigned) (both in a record)
+-- 	done (bit)
+
+-- 	bram_address (unsigned)
+-- )

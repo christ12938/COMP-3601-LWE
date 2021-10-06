@@ -18,14 +18,15 @@ package data_types is
 	-- Corresponds to the configurations in the project spec
 	constant CONFIG : natural := 3;
 
+	-- Seed for the random number generator
+	-- Always width 16 because the random number generator's widths are constant
+	constant RNG_BIT_WIDTH : natural := 16;
+	constant SEED : unsigned(RNG_BIT_WIDTH * 2 - 1 downto 0) := to_unsigned(123, RNG_BIT_WIDTH * 2);
+
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
 	function a_height return natural;	-- Height of matrix A
-
---	constant a_width : natural := 4;
---	constant a_height : natural := 8
-
-
+	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
 	function min_q return natural;	-- Minimum q
@@ -117,8 +118,8 @@ package body data_types is
 		case CONFIG is
 		when 1 => return 0;	-- FIXME
 		when 2 => return 0;	-- FIXME
-		when 3 => return 255;
-		when others => return 255;
+		when 3 => return 256;
+		when others => return 256;
 		end case;
 	end;
 
@@ -127,8 +128,8 @@ package body data_types is
 		case CONFIG is
 		when 1 => return 0;	-- FIXME
 		when 2 => return 0;	-- FIXME
-		when 3 => return 14;
-		when others => return 14;
+		when 3 => return 15;
+		when others => return 15;
 		end case;
 	end;
 
