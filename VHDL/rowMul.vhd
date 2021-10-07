@@ -41,7 +41,7 @@ end rowMul;
 architecture Behavioral of rowMul is
 
 begin
- p_IMAGE : process(reset, start)
+ p_IMAGE : process(reset, start, A, S)
     variable productTemp : unsigned( mul_bits - 1 downto 0);
     variable sumTemp : unsigned ( mul_bits - 1 downto 0);
 --    variable productTemp : integer := 0;

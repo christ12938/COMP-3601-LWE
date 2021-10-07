@@ -29,7 +29,7 @@ package data_types is
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
-	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
+	--constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
@@ -112,9 +112,9 @@ package body data_types is
 	function mul_bits return natural is
 	begin
 		case CONFIG is
-		when 1 => return 17;
-		when 2 => return 30;
-		when 3 => return 36;
+		when 1 => return 18;
+		when 2 => return 31;
+		when 3 => return 37;
 		when others => return 36;
 		end case;
 	end;
