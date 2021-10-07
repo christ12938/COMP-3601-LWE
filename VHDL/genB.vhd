@@ -31,7 +31,7 @@ use work.data_types.ALL;
 
 entity genB is
     Port(   Clock, Reset, Start : in std_logic;
-            A, S : in array_mul_t;
+            A, S : in array_mul_t (0 to a_width-1);
             Q : in unsigned (n_bits - 1 DOWNTO 0);
             B : out unsigned(n_bits - 1 DOWNTO 0);
             Done : out std_logic);
@@ -127,7 +127,7 @@ begin
             result => rowMul_result);
             
     err_gen: error_generator port map (
-            max_cap => 8,
+            max_cap => 1,
             clk => Clock,
             reset => Reset,
             start_signal => modulue_start,

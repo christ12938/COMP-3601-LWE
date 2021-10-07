@@ -16,7 +16,7 @@ END modulus;
 ARCHITECTURE Behavior OF modulus IS
 BEGIN
     PROCESS (Start, Reset)
-         VARIABLE result: UNSIGNED(mul_bits - 1 DOWNTO 0);
+         VARIABLE result: UNSIGNED(mul_bits - 1 DOWNTO 0); --BUG??
     BEGIN
         IF Reset = '1' OR Start = '0' THEN
             Done <= '0';
