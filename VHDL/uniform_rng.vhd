@@ -46,7 +46,7 @@ begin
   begin
       if reset = '1' then
         rand <= SEED;
-      elsif rising_edge(clk) and start_signal = '1' then
+      elsif rising_edge (clk) and start_signal = '1' then
           rand <= feedback&rand(31 downto 1);
       end if;
   end process;
