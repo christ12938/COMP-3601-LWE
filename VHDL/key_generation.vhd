@@ -40,7 +40,7 @@ architecture behavioural of key_generation is
 			random_number : out std_logic_vector(15 downto 0)
 		);
 	end component;
-	
+
 	component unsigned_counter is
 		generic (
 			BIT_WIDTH : positive := 32
@@ -49,11 +49,11 @@ architecture behavioural of key_generation is
 			clock : in std_logic;
 			reset_n : in std_logic;
 			enable : in std_logic;
-			
+
 			count : out unsigned(BIT_WIDTH - 1 DOWNTO 0)
 		);
 	end component;
-	
+
 	signal reset : std_logic := '1';
 
 	type rng_vec_t is array(natural range <>) of std_logic_vector(15 downto 0);
@@ -69,6 +69,7 @@ architecture behavioural of key_generation is
 	signal counter : unsigned(a_bram_address_width - 1 downto 0);
 	signal counter_enable : std_logic := '0';
 	signal counter_reset_n : std_logic := '0';
+	signal counter_done : std_logic := '0';
 begin
 	reset <= not reset_n;
 
@@ -83,7 +84,7 @@ begin
 			random_number => rng_vector(i),
 			start_signal => '1'
 		);
-		
+
 		-- uniform_rng always gives 16 bit numbers so it must be resized to n_bits
 		a_out(i) <= resize(unsigned(rng_vector(i)), n_bits);
 		s_out(i) <= resize(unsigned(rng_vector(i)), n_bits);
@@ -98,10 +99,17 @@ begin
 		enable => counter_enable,
 		count => counter
 	);
-
+	-- Check for counter done
+	process(counter) begin
+		if counter = a_height then
+			counter_done <= '1';
+		else
+			counter_done <= '0';
+		end if;
+	end process;
+	
 	-- State transition
-	process(clock, reset_n)
-	begin
+	process(clock, reset_n) begin
 		if reset_n = '0' then
 			current_state <= idle;
 			next_state <= idle;
@@ -111,8 +119,7 @@ begin
 	end process;
 
 	-- State outputs
-	process
-	begin
+	process(current_state, start, gen_q_valid, counter_done) begin
 		-- Default behaviours
 		next_state <= current_state;
 		done <= '0';
@@ -123,7 +130,7 @@ begin
 		b_valid <= '0';
 		s_valid <= '0';
 		counter_enable <= '0';
-		counter_reset_n <= '1';
+		counter_reset_n <= '0';
 		case current_state is
 		when idle =>
 			if start = '1' then
@@ -139,11 +146,24 @@ begin
 				gen_q_start <= '1';
 			end if;
 		when gen_s =>
-			-- The random number generators are connected to s_out
+			-- The random number generators are connected to s_out and is always running
+			-- We just take the random number at this clock cycle
 			s_valid <= '1';
 			next_state <= gen_a;
 		when gen_a =>
-			-- TODO
+			-- As long as we're still in gen_a state, a is valid
+			a_valid <= '1';
+			-- Counter should be ready whenever we're in gen_a state
+			counter_reset_n <= '1';
+
+			if counter_done = '1' then
+				-- Counter is done
+				next_state <= gen_b;
+			else
+				-- Counter is still going or it hasn't started
+				counter_enable <= '1';
+				
+			end if;
 		when gen_b =>
 			-- TODO
 		when finished =>
