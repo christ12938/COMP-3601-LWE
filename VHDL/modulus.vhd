@@ -1,31 +1,36 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
+USE WORK.DATA_TYPES.ALL;
 
 ENTITY modulus IS
-	GENERIC ( N : INTEGER := 36;
-	          M : INTEGER := 16);
-	PORT(	Start    : IN 		STD_LOGIC;
-			Dividend                : IN		STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
-			Divisor		            : IN		STD_LOGIC_VECTOR(M - 1 DOWNTO 0);
-			Remainder               : OUT       STD_LOGIC_VECTOR(M - 1 DOWNTO 0));
+	GENERIC (  mul_bits : NATURAL := mul_bits;
+	           n_bits : NATURAL := n_bits);
+	PORT(	Start, Reset, Clock    : IN 		STD_LOGIC;
+			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
+			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
+			Remainder               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0);
+			Done                    : OUT    STD_LOGIC);
 END modulus;
 
 ARCHITECTURE Behavior OF modulus IS
 BEGIN
-    PROCESS (Start)
-         VARIABLE result: UNSIGNED(N - 1 DOWNTO 0);
+    PROCESS (Start, Reset)
+         VARIABLE result: UNSIGNED(mul_bits - 1 DOWNTO 0);
     BEGIN
-        IF Start = '1' THEN
+        IF Reset = '1' OR Start = '0' THEN
+            Done <= '0';
+        ELSIF Start = '1' THEN
              result := (others => '0');
-             FOR i IN N - 1 DOWNTO 0 LOOP
-               result := result (N - 2 DOWNTO 0) & '0';
+             FOR i IN mul_bits - 1 DOWNTO 0 LOOP
+               result := result (mul_bits - 2 DOWNTO 0) & '0';
                result(0) := Dividend(i);
-               IF result >= UNSIGNED(Divisor) THEN
-                    result := result - UNSIGNED(Divisor);
+               IF result >= Divisor THEN
+                    result := result - Divisor;
                END IF;
              END LOOP;
-                Remainder <= STD_LOGIC_VECTOR(result(M - 1 DOWNTO 0));
+             Remainder <= UNSIGNED(result(n_bits - 1 DOWNTO 0));
+             Done <= '1';
          END IF;
     END PROCESS;
     

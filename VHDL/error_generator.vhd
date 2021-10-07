@@ -36,6 +36,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity error_generator is
     Port ( max_cap : in integer;    -- max cap === min cap
            clk,reset,start_signal   :in std_logic;
+           done     : out std_logic;
            error    : out integer);
 end error_generator;
 
@@ -59,7 +60,6 @@ architecture Behavioral of error_generator is
     signal width: integer;
     signal fake_signal: std_logic;
     signal random_number_signal: std_logic_vector(15 downto 0);
-    signal  result: std_logic_vector(15 downto 0) := (others => '0');
 
 begin
     rn_range <= 2 * max_cap;
@@ -77,27 +77,30 @@ begin
                                  width         => width,
                                  random_number => random_number_signal );
     
-    process(clk)
+    process(clk, reset)
         variable sample :integer := 0;
         variable var: integer;
+        variable result: std_logic_vector(15 downto 0);
 
     begin
-        if reset = '1' then
-            result <= (others => '0');
+        if reset = '1' or start_signal = '0' then
+            result := (others => '0');
+            done <= '0';
             sample := 0;
-        elsif rising_edge(clk) and start_signal = '1' and sample < 5 then
-            result <= result + random_number_signal;
+        elsif start_signal = '1' and sample < 5 then
+            result := result + random_number_signal;
             if (to_integer(unsigned(result)) > rn_range) then
-                result <= result - rn_range;
+                result := result - rn_range;
             end if;
             sample := sample +1;
-        end if;
-        if sample = 5 then         -- summing 10 uniform random numbers to get a random number
-            var := to_integer(unsigned(result));
---            if (var > rn_range) then
---                var := var - rn_range;
---            end if;
-            error <= var - max_cap;
+            if sample = 5 then         -- summing 10 uniform random numbers to get a random number
+                var := to_integer(unsigned(result));
+--                          if (var > rn_range) then
+--                          var := var - rn_range;
+--                          end if;
+                error <= var - max_cap;
+                done <= '1';
+            end if;
         end if;
     end process;
     

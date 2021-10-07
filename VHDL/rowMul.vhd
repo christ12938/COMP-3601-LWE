@@ -32,23 +32,25 @@ entity rowMul is
 	generic (
 		mul_bits : natural := mul_bits
 		);
-	Port ( clk : in STD_LOGIC;
-           A : in array_mul_t;
+	Port ( A : in array_mul_t;
            S : in array_mul_t;
-           multiply : in std_logic;
+           reset, start : in std_logic;
            result : out unsigned);
 end rowMul;
 
 architecture Behavioral of rowMul is
 
 begin
- p_IMAGE : process(clk)
-    variable productTemp : unsigned( mul_bits - 1 downto 0) := TO_UNSIGNED(0, mul_bits);
-    variable sumTemp : unsigned ( mul_bits - 1 downto 0)  := TO_UNSIGNED(0, mul_bits);
+ p_IMAGE : process(reset, start)
+    variable productTemp : unsigned( mul_bits - 1 downto 0);
+    variable sumTemp : unsigned ( mul_bits - 1 downto 0);
 --    variable productTemp : integer := 0;
 --    variable sumTemp : integer := 0;
   begin
-    if rising_edge(clk) and multiply = '0' then
+    if reset = '1' or start = '0' then
+        productTemp := TO_UNSIGNED(0, mul_bits);
+        sumTemp := TO_UNSIGNED(0, mul_bits);
+    elsif start = '1' then
       productTemp := TO_UNSIGNED(0, mul_bits);
       sumTemp := TO_UNSIGNED(0, mul_bits);
       for ii in 0 to (a_width - 1) loop
