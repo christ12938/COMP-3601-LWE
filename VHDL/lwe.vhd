@@ -34,11 +34,13 @@ architecture behavioural of lwe is
 	-- Block RAM for storing matrix A in configuration 3
 	component a_bram_config_3 is
 		port (
-			bram_porta_0_addr : in std_logic_vector(14 downto 0);
-			bram_porta_0_clk : in std_logic;
-			bram_porta_0_din : in std_logic_vector(255 downto 0);
-			bram_porta_0_dout : out std_logic_vector(255 downto 0);
-			bram_porta_0_we : in std_logic_vector(0 to 0)
+			addra : in std_logic_vector(14 downto 0);
+			clka: in std_logic;
+			dina : in std_logic_vector(255 downto 0);
+			douta : out std_logic_vector(255 downto 0);
+			wea : in std_logic_vector(0 to 0);
+			rsta : in std_logic;
+			rsta_busy : out std_logic
 		);
 	end component;
 
@@ -59,6 +61,8 @@ architecture behavioural of lwe is
 		);
 	end component;
 
+	signal reset : std_logic := '1';
+	
 	signal q_in : unsigned(n_bits - 1 downto 0);
 	signal q_out : unsigned(n_bits - 1 downto 0);
 	signal q_enable : std_logic;
@@ -73,6 +77,7 @@ architecture behavioural of lwe is
 	signal a_bram_write_enable : std_logic;
 
 begin
+	reset <= not reset_n;
 	-- Register storing Q
 	q_reg : regne
 	generic map (n => n_bits)
@@ -108,11 +113,12 @@ begin
 	a_bram_config_3_generate : if (CONFIG = 3) generate
 		a_bram : a_bram_config_3
 		port map (
-			bram_porta_0_addr => std_logic_vector(a_bram_address),
-			bram_porta_0_clk => clock,
-			bram_porta_0_din => std_logic_vector(a_bram_data_in),
-			unsigned(bram_porta_0_dout) => a_bram_data_out,
-			bram_porta_0_we(0) => a_bram_write_enable
+			addra => std_logic_vector(a_bram_address),
+			clka => clock,
+			dina => std_logic_vector(a_bram_data_in),
+			unsigned(douta) => a_bram_data_out,
+			wea(0) => a_bram_write_enable,
+			rsta => reset
 		);
 	end generate;
 end behavioural;

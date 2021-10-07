@@ -45,7 +45,7 @@ architecture Behavioral of error_generator is
     component uniform_rng
   
       Port ( prime : in STD_LOGIC_vector (n_bits - 1 downto 0);
-             seed  : in STD_LOGIC_VECTOR ( 31 downto 0);
+             seed  : in STD_LOGIC_VECTOR ( n_bits * 2 - 1 downto 0);
              clk,reset,start_signal   :in std_logic; 
              width        :in integer;
              random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
@@ -71,7 +71,7 @@ begin
                             rng_start => fake_signal );
                             
     uut: uniform_rng  port map ( prime         => rn_range_vector,
-                                 seed          => x"ABCDE111",
+                                 seed          => std_logic_vector(SEED),
                                  clk           => clk,
                                  reset         => reset,
                                  start_signal  => fake_signal,

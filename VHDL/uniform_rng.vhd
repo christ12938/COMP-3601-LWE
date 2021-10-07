@@ -48,7 +48,7 @@ begin
 			if reset = '1' then
 				rand <= SEED;
 			elsif rising_edge (clk) and start_signal = '1' then
-					rand <= feedback&rand(n_bits * 2 - 1 downto 1);
+				rand <= feedback&rand(n_bits * 2 - 1 downto 1);
 			end if;
 	end process;
 

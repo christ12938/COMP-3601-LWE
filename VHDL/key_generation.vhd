@@ -7,8 +7,10 @@ use work.data_types.all;
 
 entity key_generation is
 	port (
-		reset_n : in std_logic;
+		reset : in std_logic;
 		clock : in std_logic;
+
+		seed_in : in unsigned(n_bits * 2 - 1 downto 0);
 
 		-- Starts the state machine
 		start : in std_logic;
@@ -34,11 +36,11 @@ end key_generation;
 architecture behavioural of key_generation is
 	component uniform_rng
 		port (
-			prime : in std_logic_vector(15 downto 0);
-			seed : in std_logic_vector(31 downto 0);
+			prime : in std_logic_vector(n_bits - 1 downto 0);
+			seed : in std_logic_vector(n_bits * 2 - 1 downto 0);
 			clk, reset, start_signal : in std_logic;
-			width : in integer := 16;
-			random_number : out std_logic_vector(15 downto 0)
+			width : in integer := n_bits;
+			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
 	end component;
 
@@ -48,13 +50,13 @@ architecture behavioural of key_generation is
 		);
 		port (
 			clock : in std_logic;
-			reset_n : in std_logic;
+			reset : in std_logic;
 			enable : in std_logic;
 
 			count : out unsigned(BIT_WIDTH - 1 DOWNTO 0)
 		);
 	end component;
-	
+
 	component genB is
 		port (
 			clock, reset, start : in std_logic;
@@ -65,7 +67,7 @@ architecture behavioural of key_generation is
 		);
 	end component;
 
-	signal reset : std_logic := '1';
+--	signal reset : std_logic;
 
 	signal rng_out : array_t(0 to a_width - 1);
 
@@ -77,7 +79,9 @@ architecture behavioural of key_generation is
 		gen_b_init,	gen_b_wait, gen_b_work,
 		finished
 	);
-
+	
+	signal seed : unsigned(n_bits * 2 - 1 downto 0);
+	
 	signal current_state : key_gen_state := idle;
 	signal next_state : key_gen_state := idle;
 
@@ -89,17 +93,18 @@ architecture behavioural of key_generation is
 
 	signal counter : unsigned(a_bram_address_width - 1 downto 0);
 	signal counter_enable : std_logic := '0';
-	signal counter_reset_n : std_logic := '0';
+	signal counter_reset_n : std_logic := '1';
 	signal counter_done : std_logic := '0';
 begin
-	reset <= not reset_n;
-
+--	reset <= not reset_n;
 	-- Generate a_width generators, these generators are used for A and s
 	a_row_generators : for i in 0 to a_width - 1 generate
+		-- Vivado complains if I don't do this with a separate signal
+		seed <= seed_in + i;
 		a_row_generator : uniform_rng
 		port map (
-			seed => std_logic_vector(SEED + i),
-			prime => std_logic_vector(to_unsigned(max_q, RNG_BIT_WIDTH)),
+			seed => std_logic_vector(seed),
+			prime => std_logic_vector(to_unsigned(max_q, n_bits)),
 			clk => clock,
 			reset => reset,
 			unsigned(random_number) => rng_out(i),
@@ -115,7 +120,7 @@ begin
 	generic map (BIT_WIDTH => a_bram_address_width)
 	port map (
 		clock => clock,
-		reset_n => counter_reset_n,
+		reset => counter_reset_n,
 		enable => counter_enable,
 		count => counter
 	);
@@ -129,15 +134,15 @@ begin
 	end process;
 
 	-- State transition
-	process(clock, reset_n) begin
-		if reset_n = '0' then
+	process(clock, reset) begin
+		if reset = '1' then
 			current_state <= idle;
-			next_state <= idle;
+--			next_state <= current_state;
 		elsif rising_edge(clock) then
 			current_state <= next_state;
 		end if;
 	end process;
-	
+
 	-- Vector B generation module
 	gen_b : genB
 	port map (
@@ -150,7 +155,7 @@ begin
 		B => b_out,
 		Done => gen_b_done
 	);
-	
+
 	-- State outputs
 	process(current_state, start, gen_q_done, counter_done, gen_b_done) begin
 		-- Default behaviours
@@ -160,10 +165,10 @@ begin
 		q_valid <= '0';
 		b_valid <= '0';
 		s_valid <= '0';
-		
+
 		gen_q_start <= '0';
 		gen_b_start <= '0';
-		
+
 		counter_enable <= '0';
 		counter_reset_n <= '0';
 
