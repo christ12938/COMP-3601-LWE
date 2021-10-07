@@ -29,6 +29,7 @@ package data_types is
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
+	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
@@ -47,6 +48,11 @@ package data_types is
 	-- myVector is a matrix
 	type myVector is array(natural range <>) of array_mul_t(0 to a_width - 1);
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
+	 -- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
+	 type encryptedMsg is record
+		u  : array_t(0 to a_width-1);
+		v : unsigned(n_bits - 1 downto 0);
+	end record encryptedMsg;
 
 end package data_types;
 
