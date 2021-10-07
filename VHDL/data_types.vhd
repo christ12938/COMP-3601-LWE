@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 1;
+	constant CONFIG : natural := 3;
 
 	-- Seed for the random number generator
 	-- Always width 16 because the random number generator's widths are constant
@@ -29,17 +29,15 @@ package data_types is
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
-	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
+	
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
 	function mul_bits return natural; -- Bit width used by the multiplier, because the multiplier needs larger numbers
 	function a_bram_data_width return natural;	-- Width of the matrix A block RAM's data
 	function a_bram_address_width return natural;	-- Width of the matrix A block RAM's address
+	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 
-	-- constant g_IMAGE_ROWS : natural := 8;
-	-- constant g_IMAGE_COLS : natural := 4;
-	-- constant g_Bits : natural := 32;
 	-- An array of mul_bits bit numbers, used in multiplier, because multiplier needs larger numbers
 	type array_mul_t is array(natural range <>) of unsigned(mul_bits - 1 downto 0);
 	-- An array of n_bits bit numbers, used in most places
