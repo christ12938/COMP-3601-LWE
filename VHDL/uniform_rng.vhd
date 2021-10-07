@@ -21,20 +21,21 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
+use work.data_types.all;
 
 entity uniform_rng is
-    Port ( prime : in STD_LOGIC_vector (15 downto 0);
+    Port ( prime : in STD_LOGIC_vector (n_bits - 1 downto 0);
            seed  : in STD_LOGIC_VECTOR ( 31 downto 0);  -- initial LFSR state
            clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
-           width        : in integer :=16;          -- log of prime which will be used to set the max map cap on the random number max : 2^width
-           random_number : out STD_LOGIC_vector(15 downto 0));
+           width        : in integer :=n_bits;          -- log of prime which will be used to set the max map cap on the random number max : 2^width
+           random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
 end;
 
 architecture Behavioral of uniform_rng is
      
 signal rand : std_logic_vector(31 downto 0) := SEED;
 signal feedback : std_logic;
-signal generated_rand : std_logic_vector(15 downto 0) ; --initilise to 0 (smallet possilbe value=1)
+signal generated_rand : std_logic_vector(n_bits - 1 downto 0) ; --initilise to 0 (smallet possilbe value=1)
 signal generated_rand_int :integer;
 signal prime_int : integer;
 begin
@@ -59,9 +60,9 @@ begin
     process(generated_rand_int,prime_int)
     begin
         if (generated_rand_int >= prime_int) then
-          random_number <= std_logic_vector(to_unsigned(generated_rand_int - prime_int,16));
+          random_number <= std_logic_vector(to_unsigned(generated_rand_int - prime_int, n_bits));
         else 
-           random_number <= std_logic_vector(to_unsigned(generated_rand_int,16));
+           random_number <= std_logic_vector(to_unsigned(generated_rand_int, n_bits));
         end if;
     end process;
 
