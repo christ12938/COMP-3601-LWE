@@ -31,7 +31,7 @@ use work.data_types.ALL;
 
 entity genB is
     Port(   Clock, Reset, Start : in std_logic;
-            A, S : in array_mul_t (0 to a_width-1);
+            A, S : in array_t (0 to a_width-1);
             Q : in unsigned (n_bits - 1 DOWNTO 0);
             B : out unsigned(n_bits - 1 DOWNTO 0);
             Done : out std_logic);
@@ -76,7 +76,16 @@ architecture Behavioral of genB is
     signal modulus_done: std_logic;
     signal modulue_start: std_logic;
     
+    -- Temporary signals for conversion
+    signal a_temp : array_mul_t(0 to a_width - 1);
+	signal s_temp : array_mul_t(0 to a_width - 1);
+
 begin
+    -- Conversion from array_t to array_mul_t using resize()
+    array_conversion : for i in 0 to a_width - 1 generate
+    	a_temp(i) <= resize(A(i), mul_bits);
+    	s_temp(i) <= resize(S(i), mul_bits);
+    end generate;
     
     FSM_transitions: process (Reset, Clock)
     begin
@@ -116,8 +125,8 @@ begin
     end process;
     
     row_mul: rowMul port map (
-            A => A,
-            S => S,
+            A => a_temp,
+            S => s_temp,
             reset => Reset,
             start => modulue_start,
             result => rowMul_result);

@@ -16,12 +16,8 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 1;
+	constant CONFIG : natural := 3;
 
-	-- Seed for the random number generator
-	-- Always width 16 because the random number generator's widths are constant
-	constant RNG_BIT_WIDTH : natural := 16;
-	constant SEED : unsigned(RNG_BIT_WIDTH * 2 - 1 downto 0) := to_unsigned(123, RNG_BIT_WIDTH * 2);
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
@@ -29,17 +25,21 @@ package data_types is
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
-	--constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
+
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
 	function mul_bits return natural; -- Bit width used by the multiplier, because the multiplier needs larger numbers
 	function a_bram_data_width return natural;	-- Width of the matrix A block RAM's data
 	function a_bram_address_width return natural;	-- Width of the matrix A block RAM's address
+	function primes_bram_address_width return natural;
+	function num_primes return natural;
+	-- Block RAM data width for the primes is n_bits
 
-	-- constant g_IMAGE_ROWS : natural := 8;
-	-- constant g_IMAGE_COLS : natural := 4;
-	-- constant g_Bits : natural := 32;
+	-- Seed for the random number generator
+	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(123, n_bits * 2);
+	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
+
 	-- An array of mul_bits bit numbers, used in multiplier, because multiplier needs larger numbers
 	type array_mul_t is array(natural range <>) of unsigned(mul_bits - 1 downto 0);
 	-- An array of n_bits bit numbers, used in most places
@@ -47,9 +47,10 @@ package data_types is
 
 	-- myVector is a matrix
 	type myVector is array(natural range <>) of array_mul_t(0 to a_width - 1);
+
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
-	 -- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
-	 type encryptedMsg is record
+	-- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
+	type encryptedMsg is record
 		u  : array_t(0 to a_width-1);
 		v : unsigned(n_bits - 1 downto 0);
 	end record encryptedMsg;
@@ -136,6 +137,26 @@ package body data_types is
 		when 2 => return 0;	-- FIXME
 		when 3 => return 15;
 		when others => return 15;
+		end case;
+	end;
+
+	function primes_bram_address_width return natural is
+	begin
+		case CONFIG is
+		when 1 => return 5;
+		when 2 => return 10;
+		when 3 => return 13;
+		when others => return 13;
+		end case;
+	end;
+	
+	function num_primes return natural is
+	begin
+		case CONFIG is
+		when 1 => return 31;
+		when 2 => return 719;
+		when 3 => return 4642;
+		when others => return 4642;
 		end case;
 	end;
 
