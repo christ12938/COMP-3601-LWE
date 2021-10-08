@@ -56,15 +56,15 @@ architecture behavioural of gen_q is
 
 	signal address : unsigned(primes_bram_address_width - 1 downto 0) := to_unsigned(0, primes_bram_address_width);
 	signal random_number : unsigned(n_bits - 1 downto 0);
-	
+	signal start_rng : std_logic := '1';
 begin
 	-- Random number generator
 	rng : uniform_rng
 	port map (
 		clk => clock,
 		reset => reset,
-		start_signal => '1',
-
+		start_signal => start_rng,
+--		seed => x"d545",
 		seed => std_logic_vector(seed),
 		prime => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),
 		width => primes_bram_address_width - 1,

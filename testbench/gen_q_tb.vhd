@@ -30,7 +30,7 @@ begin
 	-- Stimulus
 	process begin
 		reset <= '1';
-		wait for 5 * CLOCK_PERIOD;
+		wait for 8 * CLOCK_PERIOD;
 		reset <= '0';
 		wait;
 	end process;

@@ -10,7 +10,7 @@ entity key_generation is
 		reset : in std_logic;
 		clock : in std_logic;
 
-		seed_in : in unsigned(n_bits * 2 - 1 downto 0);
+--		seed_in : in unsigned(n_bits * 2 - 1 downto 0);
 
 		-- Starts the state machine
 		start : in std_logic;
@@ -43,17 +43,13 @@ architecture behavioural of key_generation is
 			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
 	end component;
-
-	component unsigned_counter is
-		generic (
-			BIT_WIDTH : positive := 32
-		);
+	
+	component gen_q is
 		port (
 			clock : in std_logic;
-			reset : in std_logic;
-			enable : in std_logic;
-
-			count : out unsigned(BIT_WIDTH - 1 DOWNTO 0)
+			reset : std_logic;
+			seed : in unsigned(n_bits * 2 - 1 downto 0);
+			random_prime : out unsigned(n_bits - 1 downto 0)
 		);
 	end component;
 
@@ -67,43 +63,43 @@ architecture behavioural of key_generation is
 		);
 	end component;
 
---	signal reset : std_logic;
-
 	signal rng_out : array_t(0 to a_width - 1);
 
 	type key_gen_state is (
-		idle,
-		gen_q,
-		gen_s,
-		gen_a,
-		gen_b_init,	gen_b_wait, gen_b_work,
-		finished
+		s_idle,
+		s_gen_q,
+		s_gen_s,
+		s_gen_a,
+		s_gen_b_wait, s_gen_b_work,
+		s_finished
 	);
-	
-	signal seed : unsigned(n_bits * 2 - 1 downto 0);
-	
-	signal current_state : key_gen_state := idle;
-	signal next_state : key_gen_state := idle;
-
-	signal gen_q_done : std_logic := '0';
-	signal gen_q_start : std_logic := '0';
+		
+	signal current_state : key_gen_state := s_idle;
+	signal next_state : key_gen_state := s_idle;
 
 	signal gen_b_start : std_logic := '0';
 	signal gen_b_done : std_logic := '0';
-
-	signal counter : unsigned(a_bram_address_width - 1 downto 0);
+	
 	signal counter_enable : std_logic := '0';
-	signal counter_reset_n : std_logic := '1';
-	signal counter_done : std_logic := '0';
+	signal counter : integer range 0 to a_height := 0;
+	signal counter_reset_synchronous : std_logic := '0';
+	
 begin
---	reset <= not reset_n;
+	-- Prime generation
+	prime_generator : gen_q
+	port map (
+		clock => clock,
+		reset => reset,
+		seed => SEED,
+		random_prime => q_out
+	);
+	
 	-- Generate a_width generators, these generators are used for A and s
 	a_row_generators : for i in 0 to a_width - 1 generate
 		-- Vivado complains if I don't do this with a separate signal
-		seed <= seed_in + i;
 		a_row_generator : uniform_rng
 		port map (
-			seed => std_logic_vector(seed),
+			seed => std_logic_vector(SEED + i * 1000),
 			prime => std_logic_vector(to_unsigned(max_q, n_bits)),
 			clk => clock,
 			reset => reset,
@@ -115,28 +111,10 @@ begin
 	a_out <= rng_out;
 	s_out <= rng_out;
 
-	-- Counter for block RAM addressing
-	address_counter : unsigned_counter
-	generic map (BIT_WIDTH => a_bram_address_width)
-	port map (
-		clock => clock,
-		reset => counter_reset_n,
-		enable => counter_enable,
-		count => counter
-	);
-	-- Check for counter done
-	process(counter) begin
-		if counter = a_height then
-			counter_done <= '1';
-		else
-			counter_done <= '0';
-		end if;
-	end process;
-
 	-- State transition
 	process(clock, reset) begin
 		if reset = '1' then
-			current_state <= idle;
+			current_state <= s_idle;
 --			next_state <= current_state;
 		elsif rising_edge(clock) then
 			current_state <= next_state;
@@ -155,9 +133,27 @@ begin
 		B => b_out,
 		Done => gen_b_done
 	);
+	
+	-- Counter
+	count : process(clock, reset)
+		variable counter_variable : integer range 0 to a_height := 0;
+	begin
+		if reset = '1' then
+			counter_variable := 0;
+		elsif rising_edge(clock) then
+			if counter_reset_synchronous = '1' then
+				counter_variable := 0;
+			elsif counter_enable = '1' then
+				counter_variable := counter_variable + 1;
+			end if;
+		end if;
+		counter <= counter_variable;
+	end process;
 
 	-- State outputs
-	process(current_state, start, gen_q_done, counter_done, gen_b_done) begin
+	process(current_state, start, gen_b_done, counter)
+	begin
+
 		-- Default behaviours
 		next_state <= current_state;
 		done <= '0';
@@ -165,68 +161,51 @@ begin
 		q_valid <= '0';
 		b_valid <= '0';
 		s_valid <= '0';
+		
+		counter_enable <= '0';
+		counter_reset_synchronous <= '0';
 
-		gen_q_start <= '0';
 		gen_b_start <= '0';
 
-		counter_enable <= '0';
-		counter_reset_n <= '0';
-
 		case current_state is
-		when idle =>
+		when s_idle =>
 			if start = '1' then
-				next_state <= gen_q;
+				next_state <= s_gen_q;
 			end if;
 
-		when gen_q =>
-			if gen_q_done = '1' then
-				-- q generation is finished
-				q_valid <= '1';
-				next_state <= gen_s;
-			else
-				-- q generation hasn't finished or is starting
-				gen_q_start <= '1';
-			end if;
+		when s_gen_q =>
+			-- The random number generators are connected to q_out and are always running
+			-- We just take the random number at this clock cycle
+			q_valid <= '1';
+			next_state <= s_gen_s;
+			
 
-		when gen_s =>
-			-- The random number generators are connected to s_out and is always running
+		when s_gen_s =>
+			-- The random number generators are connected to s_out and are always running
 			-- We just take the random number at this clock cycle
 			s_valid <= '1';
-			next_state <= gen_a;
+			next_state <= s_gen_a;
 
-		when gen_a =>
+		when s_gen_a =>
 			-- As long as we're still in gen_a state, a is valid
 			a_valid <= '1';
-			-- Counter should not be reset whenever we're in gen_a state
-			counter_reset_n <= '1';
-
-			if counter_done = '1' then
-				-- Counter is done
-				next_state <= gen_b_init;
+						
+			if counter = a_height - 1 then
+				-- Counter done
+				next_state <= s_gen_b_wait;
+				counter_reset_synchronous <= '1';
 			else
-				-- Counter is still going or it hasn't started
 				counter_enable <= '1';
-
 			end if;
-
-		when gen_b_init =>
-			-- Reset the counter
-			counter_reset_n <= '0';
-			next_state <= gen_b_wait;
-
-		when gen_b_wait =>
+		when s_gen_b_wait =>
 			-- 1 clock cycle to wait for the block RAM to have the right output ready
-			-- Don't reset the counter
-			counter_reset_n <= '1';
 			-- Tell gen_b to start working
 			gen_b_start <= '1';
 
-			next_state <= gen_b_work;
+			next_state <= s_gen_b_work;
 
-		when gen_b_work =>
-			-- Don't reset the counter
-			counter_reset_n <= '1';
-
+		when s_gen_b_work =>
+			gen_b_start <= '1';
 			if gen_b_done = '1' then
 				-- gen_b is finished
 				-- Acknowledge by de-asserting gen_b_start
@@ -234,21 +213,21 @@ begin
 				-- Tell external components gen_b is valid
 				b_valid <= '1';
 
-				if counter_done = '1' then
+				if counter = b_height - 1 then
 					-- Counter is done, meaning we've written all of vector B
-					next_state <= finished;
+					next_state <= s_finished;
+					counter_reset_synchronous <= '1';
 				else
 					-- Counter isn't done, so continue with the next element of vector B
 					-- Increment the counter
 					counter_enable <= '1';
 					-- Go wait a clock cycle for the block RAM to work
-					next_state <= gen_b_wait;
+					next_state <= s_gen_b_wait;
 				end if;
-			else
-				gen_b_start <= '1';
 			end if;
+				-- gen_b is still working
 
-		when finished =>
+		when s_finished =>
 			done <= '1';
 			report "Key generation finished" severity note;
 		when others =>
