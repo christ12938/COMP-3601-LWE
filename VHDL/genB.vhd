@@ -65,15 +65,13 @@ architecture Behavioral of genB is
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
     
-    type state_type is (S1, S2, S3, S4);
+    type state_type is (S1, S2, S3);
     signal state : state_type;  
     signal modulus_start: std_logic;
     signal errorGen_done : std_logic;
     signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);    
     signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
     signal errorGen_result : integer;
-    signal add_done : std_logic;
-    signal modulus_done: std_logic;
     signal modulue_start: std_logic;
     
     -- Temporary signals for conversion
@@ -98,9 +96,7 @@ begin
                 when S2 =>
                     if errorGen_done = '1' then state <= S3; else state <= S2; end if;
                 when S3 =>
-                    if add_done = '1' then state <= S4; else state <= S3; end if;
-                when S4 =>
-                    if Start = '1' then state <= S4; else state <= S1; end if;
+                    if Start = '1' then state <= S3; else state <= S1; end if;
             end case;
         end if;
     end process;
@@ -110,16 +106,13 @@ begin
         case state is
             when S1 => 
                 Done <= '0';
-                modulus_start <= '0';  
-                add_done <= '0';
                 modulue_start <= '0';
+                modulus_start <= '0';  
             when S2 =>
                 modulue_start <= '1';
             when S3 =>
-                modulus_input <= rowMul_result + errorGen_result;
-                add_done <= '1';
-            when S4 =>
                 modulus_start <= '1';
+                modulue_start <= '0';
                 Done <= '1';
         end case;
     end process;
@@ -146,6 +139,6 @@ begin
             Divisor => Q,
             Modulo => B);
 
-
+    modulus_input <= rowMul_result + errorGen_result;
 
 end Behavioral;
