@@ -18,7 +18,6 @@ package data_types is
 	-- Corresponds to the configurations in the project spec
 	constant CONFIG : natural := 3;
 
-
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
 	function a_height return natural;	-- Height of matrix A
@@ -29,15 +28,17 @@ package data_types is
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
-	function mul_bits return natural; -- Bit width used by the multiplier, because the multiplier needs larger numbers
+	function mul_bits return natural;	-- Bit width used by the multiplier, because the multiplier needs larger numbers
 	function a_bram_data_width return natural;	-- Width of the matrix A block RAM's data
 	function a_bram_address_width return natural;	-- Width of the matrix A block RAM's address
-	function primes_bram_address_width return natural;
-	function num_primes return natural;
+	function primes_bram_address_width return natural;	-- Width of the primes block ROM's address
+	function num_primes return natural;	-- Number of total primes for each configuration
 	-- Block RAM data width for the primes is n_bits
 
 	-- Seed for the random number generator
-	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(123, n_bits * 2);
+	-- Number will just be truncated when n_bits is smaller
+	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(923456847, n_bits * 2);
+
 	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 
 	-- An array of mul_bits bit numbers, used in multiplier, because multiplier needs larger numbers
@@ -51,7 +52,7 @@ package data_types is
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
 	-- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
 	type encryptedMsg is record
-		u  : array_t(0 to a_width-1);
+		u : array_t(0 to a_width-1);
 		v : unsigned(n_bits - 1 downto 0);
 	end record encryptedMsg;
 
@@ -149,7 +150,7 @@ package body data_types is
 		when others => return 13;
 		end case;
 	end;
-	
+
 	function num_primes return natural is
 	begin
 		case CONFIG is

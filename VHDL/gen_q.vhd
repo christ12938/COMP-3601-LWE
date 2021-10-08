@@ -56,6 +56,7 @@ architecture behavioural of gen_q is
 
 	signal address : unsigned(primes_bram_address_width - 1 downto 0) := to_unsigned(0, primes_bram_address_width);
 	signal random_number : unsigned(n_bits - 1 downto 0);
+	
 begin
 	-- Random number generator
 	rng : uniform_rng
@@ -66,7 +67,7 @@ begin
 
 		seed => std_logic_vector(seed),
 		prime => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),
-		width => n_bits - 1,
+		width => primes_bram_address_width - 1,
 		unsigned(random_number) => random_number
 	);
 

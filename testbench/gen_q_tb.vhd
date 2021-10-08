@@ -19,17 +19,18 @@ architecture behavioural of gen_q_tb is
 	);
 	end component;
 
---	constant CLOCK_PERIOD : time := 20 ns;
+	constant CLOCK_PERIOD : time := 20 ns;
 
 	signal clock : std_logic := '0';
 	signal reset : std_logic := '0';
 begin
 	-- Clock
-	clock <= not clock after 10 ns;
+	clock <= not clock after CLOCK_PERIOD / 2;
 
+	-- Stimulus
 	process begin
 		reset <= '1';
-		wait for 5 ns;
+		wait for 5 * CLOCK_PERIOD;
 		reset <= '0';
 		wait;
 	end process;

@@ -27,6 +27,8 @@ entity uniform_rng is
 		Port ( prime : in STD_LOGIC_vector (n_bits - 1 downto 0);
 					 seed  : in STD_LOGIC_VECTOR (n_bits * 2 - 1 downto 0);  -- initial LFSR state
 					 clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
+					 -- Make sure the width has the - 1 already otherwise Vivado gives you a weird error!
+					 -- e.g. width => n_bits - 1, not width = n_bits
 					 width        : in integer := n_bits;          -- log of prime which will be used to set the max map cap on the random number max : 2^width
 					 random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
 end;
