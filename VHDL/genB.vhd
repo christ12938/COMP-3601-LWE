@@ -59,14 +59,13 @@ architecture Behavioral of genB is
     component modulus is
        generic ( mul_bits : natural := mul_bits;
 	             n_bits : natural := n_bits);
-	   Port(	Start, Reset, Clock    : IN 		STD_LOGIC;
+	   Port(	Start, Reset        : IN 		STD_LOGIC;
 			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
-			Remainder               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0);
-			Done                    : OUT    STD_LOGIC);
+			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
     
-    type state_type is (S1, S2, S3, S4, S5);
+    type state_type is (S1, S2, S3, S4);
     signal state : state_type;  
     signal modulus_start: std_logic;
     signal errorGen_done : std_logic;
@@ -101,9 +100,7 @@ begin
                 when S3 =>
                     if add_done = '1' then state <= S4; else state <= S3; end if;
                 when S4 =>
-                    if modulus_done = '1' then state <= S5; else state <= S4; end if;
-                when S5 =>
-                    if Start = '1' then state <= S5; else state <= S1; end if;
+                    if Start = '1' then state <= S4; else state <= S1; end if;
             end case;
         end if;
     end process;
@@ -123,7 +120,6 @@ begin
                 add_done <= '1';
             when S4 =>
                 modulus_start <= '1';
-            when S5 =>
                 Done <= '1';
         end case;
     end process;
@@ -146,11 +142,9 @@ begin
     modu: modulus port map(
             Start => modulus_start,
             Reset => Reset,
-            Clock => Clock,
             Dividend => modulus_input,
             Divisor => Q,
-            Remainder => B,
-            Done => modulus_done);
+            Modulo => B);
 
 
 

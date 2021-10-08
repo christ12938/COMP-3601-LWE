@@ -114,9 +114,9 @@ package body data_types is
 	function mul_bits return natural is
 	begin
 		case CONFIG is
-		when 1 => return 17;
-		when 2 => return 30;
-		when 3 => return 36;
+		when 1 => return 18;
+		when 2 => return 31;
+		when 3 => return 37;
 		when others => return 36;
 		end case;
 	end;
