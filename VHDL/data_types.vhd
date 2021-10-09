@@ -34,6 +34,8 @@ package data_types is
 	function primes_bram_address_width return natural;	-- Width of the primes block ROM's address
 	function num_primes return natural;	-- Number of total primes for each configuration
 	-- Block RAM data width for the primes is n_bits
+	constant b_bram_data_width : natural := a_bram_data_width;
+	constant b_bram_address_width : natural := a_bram_address_width;
 
 	-- Seed for the random number generator
 	-- Number will just be truncated when n_bits is smaller
