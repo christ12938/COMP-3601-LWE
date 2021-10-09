@@ -10,15 +10,15 @@ architecture bench of genB_tb is
 
   component genB
       Port(   Clock, Reset, Start : in std_logic;
-              A, S : in array_mul_t;
+              A, S : in array_t;
               Q : in unsigned (n_bits - 1 DOWNTO 0);
               B : out unsigned(n_bits - 1 DOWNTO 0);
               Done : out std_logic);
   end component;
 
   signal Clock, Reset, Start: std_logic;
-  signal A :  array_mul_t(0 to a_width-1);
-  signal S :  array_mul_t(0 to a_width-1);
+  signal A :  array_t(0 to a_width-1);
+  signal S :  array_t(0 to a_width-1);
   signal Q: unsigned(n_bits - 1 DOWNTO 0) := TO_UNSIGNED(79,n_bits);
   signal B: unsigned(n_bits - 1 DOWNTO 0);
   signal Done: std_logic ;
@@ -48,14 +48,14 @@ begin
     wait for 5 ns;
     Reset <= '0';
     wait for 5 ns;
-    A <= (TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits));
-    S <= (TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits), TO_UNSIGNED(0, mul_bits));
+    A <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
+    S <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
     Start <= '1';
-    wait for 100ns;
+    wait for 35ns;
     Start <= '0';
     wait for 10ns;
-    A <= (TO_UNSIGNED(30, mul_bits), TO_UNSIGNED(45, mul_bits), TO_UNSIGNED(75, mul_bits), TO_UNSIGNED(43, mul_bits));
-    S <= (TO_UNSIGNED(27, mul_bits), TO_UNSIGNED(58, mul_bits), TO_UNSIGNED(8, mul_bits), TO_UNSIGNED(2, mul_bits));
+    A <= (TO_UNSIGNED(30, n_bits), TO_UNSIGNED(45, n_bits), TO_UNSIGNED(75, n_bits), TO_UNSIGNED(43, n_bits));
+    S <= (TO_UNSIGNED(27, n_bits), TO_UNSIGNED(58, n_bits), TO_UNSIGNED(8, n_bits), TO_UNSIGNED(2, n_bits));
     Start <= '1';
     -- Put test bench stimulus code here
     

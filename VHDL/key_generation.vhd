@@ -21,7 +21,10 @@ entity key_generation is
 
 		-- Asserts when the state machine is finished
 		done : out std_logic;
-
+		
+		-- Address is connected to both A and B block RAMs
+		bram_address : out unsigned(a_bram_address_width - 1 downto 0);
+		
 		q_out : out unsigned(n_bits - 1 downto 0);
 		q_valid : out std_logic;
 		a_out : out array_t(0 to a_width - 1);
@@ -161,6 +164,8 @@ begin
 		q_valid <= '0';
 		b_valid <= '0';
 		s_valid <= '0';
+
+		bram_address <= to_unsigned(counter, bram_address'length);
 		
 		counter_enable <= '0';
 		counter_reset_synchronous <= '0';

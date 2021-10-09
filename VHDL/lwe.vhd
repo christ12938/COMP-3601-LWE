@@ -31,13 +31,37 @@ entity lwe is
 end entity;
 
 architecture behavioural of lwe is
+	-- Block RAM for storing matrix A in configuration 1
+	component a_bram_config_1 is
+		port (
+			addra : in std_logic_vector(a_bram_address_width - 1 downto 0);
+			clka: in std_logic;
+			dina : in std_logic_vector(a_bram_data_width - 1 downto 0);
+			douta : out std_logic_vector(a_bram_data_width - 1 downto 0);
+			wea : in std_logic_vector(0 to 0);
+			rsta : in std_logic;
+			rsta_busy : out std_logic
+		);
+	end component;
+	-- Block RAM for storing matrix A in configuration 2
+	component a_bram_config_2 is
+		port (
+			addra : in std_logic_vector(a_bram_address_width - 1 downto 0);
+			clka: in std_logic;
+			dina : in std_logic_vector(a_bram_data_width - 1 downto 0);
+			douta : out std_logic_vector(a_bram_data_width - 1 downto 0);
+			wea : in std_logic_vector(0 to 0);
+			rsta : in std_logic;
+			rsta_busy : out std_logic
+		);
+	end component;
 	-- Block RAM for storing matrix A in configuration 3
 	component a_bram_config_3 is
 		port (
-			addra : in std_logic_vector(14 downto 0);
+			addra : in std_logic_vector(a_bram_address_width - 1 downto 0);
 			clka: in std_logic;
-			dina : in std_logic_vector(255 downto 0);
-			douta : out std_logic_vector(255 downto 0);
+			dina : in std_logic_vector(a_bram_data_width - 1 downto 0);
+			douta : out std_logic_vector(a_bram_data_width - 1 downto 0);
 			wea : in std_logic_vector(0 to 0);
 			rsta : in std_logic;
 			rsta_busy : out std_logic
@@ -105,10 +129,26 @@ begin
 	-- This section uses an if generate because the block RAM was generated via the Vivado UI, so the block RAM VHDL implementation isn't available
 	-- Block RAM for matrix A in configuration 1
 	a_bram_config_1_generate : if (CONFIG = 1) generate
-		-- TODO add block RAM for configuration 1
+		a_bram : a_bram_config_1
+		port map (
+			addra => std_logic_vector(a_bram_address),
+			clka => clock,
+			dina => std_logic_vector(a_bram_data_in),
+			unsigned(douta) => a_bram_data_out,
+			wea(0) => a_bram_write_enable,
+			rsta => reset
+		);
 	end generate;
 	a_bram_config_2_generate : if (CONFIG = 2) generate
-		-- TODO add block RAM for configuration 2
+		a_bram : a_bram_config_2
+		port map (
+			addra => std_logic_vector(a_bram_address),
+			clka => clock,
+			dina => std_logic_vector(a_bram_data_in),
+			unsigned(douta) => a_bram_data_out,
+			wea(0) => a_bram_write_enable,
+			rsta => reset
+		);
 	end generate;
 	a_bram_config_3_generate : if (CONFIG = 3) generate
 		a_bram : a_bram_config_3

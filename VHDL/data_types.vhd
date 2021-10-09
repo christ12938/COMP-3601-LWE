@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 3;
+	constant CONFIG : natural := 1;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
@@ -124,18 +124,18 @@ package body data_types is
 	function a_bram_data_width return natural is
 	begin
 		case CONFIG is
-		when 1 => return 0;	-- FIXME
-		when 2 => return 0;	-- FIXME
-		when 3 => return 256;
-		when others => return 256;
+		when 1 => return n_bits * 4;
+		when 2 => return n_bits * 8;
+		when 3 => return n_bits * 16;
+		when others => return n_bits * 16;
 		end case;
 	end;
 
 	function a_bram_address_width return natural is
 	begin
 		case CONFIG is
-		when 1 => return 0;	-- FIXME
-		when 2 => return 0;	-- FIXME
+		when 1 => return 8;
+		when 2 => return 13;
 		when 3 => return 15;
 		when others => return 15;
 		end case;
