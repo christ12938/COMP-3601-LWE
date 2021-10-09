@@ -41,22 +41,20 @@ begin
   stimulus: process
   begin
   
-    -- Put initialisation code here
-
     Reset <= '1';
     Start <= '0';
-    wait for 5 ns;
+    wait for clock_period;
     Reset <= '0';
-    wait for 5 ns;
-    A <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
-    S <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
+    wait for 100 * clock_period;
+--    A <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
+--    S <= (TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits), TO_UNSIGNED(0, n_bits));
     Start <= '1';
-    wait for 35ns;
-    Start <= '0';
-    wait for 10ns;
+--    wait for clock_period * 4;
+--    Start <= '0';
+--    wait for 10ns;
     A <= (TO_UNSIGNED(30, n_bits), TO_UNSIGNED(45, n_bits), TO_UNSIGNED(75, n_bits), TO_UNSIGNED(43, n_bits));
     S <= (TO_UNSIGNED(27, n_bits), TO_UNSIGNED(58, n_bits), TO_UNSIGNED(8, n_bits), TO_UNSIGNED(2, n_bits));
-    Start <= '1';
+--    Start <= '1';
     -- Put test bench stimulus code here
     
     wait;

@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 10/06/2021 01:20:01 PM
--- Design Name: 
+-- Design Name:
 -- Module Name: genB - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -37,43 +37,42 @@ entity genB is
             Done : out std_logic);
 end genB;
 
-architecture Behavioral of genB is 
+architecture Behavioral of genB is
 
-    component rowMul is
+    component row_mul_combinational is
 	   generic (
 		  mul_bits : natural := mul_bits
 		);
 	   Port ( A : in array_mul_t;
             S : in array_mul_t;
-            reset, start : in std_logic;
+--            reset, start : in std_logic;
             result : out unsigned);
     end component;
-    
+
     component error_generator is
         Port ( max_cap : in integer;
             clk,reset,start_signal   :in std_logic;
             done     : out std_logic;
             error    : out integer);
     end component;
-    
-    component modulus is
+
+    component modulus_combinational is
        generic ( mul_bits : natural := mul_bits;
 	             n_bits : natural := n_bits);
-	   Port(	Start, Reset        : IN 		STD_LOGIC;
+	   Port(
 			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
-    
+
     type state_type is (S1, S2, S3);
-    signal state : state_type;  
-    signal modulus_start: std_logic;
+    signal state : state_type;
     signal errorGen_done : std_logic;
-    signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);    
+    signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
     signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
     signal errorGen_result : integer;
     signal modulue_start: std_logic;
-    
+
     -- Temporary signals for conversion
     signal a_temp : array_mul_t(0 to a_width - 1);
 	signal s_temp : array_mul_t(0 to a_width - 1);
@@ -84,10 +83,10 @@ begin
     	a_temp(i) <= resize(A(i), mul_bits);
     	s_temp(i) <= resize(S(i), mul_bits);
     end generate;
-    
+
     FSM_transitions: process (Reset, Clock)
     begin
-        if Reset = '1'then 
+        if Reset = '1'then
             state <= S1;
         elsif rising_edge(Clock) then
             case state is
@@ -96,34 +95,36 @@ begin
                 when S2 =>
                     if errorGen_done = '1' then state <= S3; else state <= S2; end if;
                 when S3 =>
-                    if Start = '1' then state <= S3; else state <= S1; end if;
+                    -- if Start = '1' then state <= S3; else state <= S1; end if;
+                    state <= S1;
             end case;
         end if;
     end process;
 
     do: process (state)
     begin
+        -- Default
+        modulue_start <= '0';
+        Done <= '0';
+
         case state is
-            when S1 => 
-                Done <= '0';
-                modulue_start <= '0';
-                modulus_start <= '0';  
+            when S1 =>
+            -- Signals should be in their defaults
+
             when S2 =>
                 modulue_start <= '1';
+
             when S3 =>
-                modulus_start <= '1';
-                modulue_start <= '0';
                 Done <= '1';
+
         end case;
     end process;
-    
-    row_mul: rowMul port map (
+
+    row_mul: row_mul_combinational port map (
             A => a_temp,
             S => s_temp,
-            reset => Reset,
-            start => modulue_start,
             result => rowMul_result);
-            
+
     err_gen: error_generator port map (
             max_cap => 1,
             clk => Clock,
@@ -131,10 +132,8 @@ begin
             start_signal => modulue_start,
             done => errorGen_done,
             error => errorGen_result);
-            
-    modu: modulus port map(
-            Start => modulus_start,
-            Reset => Reset,
+
+    modu: modulus_combinational port map(
             Dividend => modulus_input,
             Divisor => Q,
             Modulo => B);

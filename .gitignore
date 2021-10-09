@@ -1,1 +1,26 @@
+# ------------------------ Python Virtual Environment ------------------------ #
 .venv
+
+# ----------------------------- Block RAM Folders ---------------------------- #
+# Vivado being Vivado means it likes dump a lot of files in the directory where the block RAMs are
+# Git being git means I can't wildcard everything inside VHDL/block_rams except VHDL/block_rams/**.xci
+# So I have to manually do this for every folder >:(
+VHDL/block_rams/b_bram_config_1/*
+!VHDL/block_rams/b_bram_config_1/*.xci
+VHDL/block_rams/b_bram_config_2/*
+!VHDL/block_rams/b_bram_config_2/*.xci
+VHDL/block_rams/b_bram_config_3/*
+!VHDL/block_rams/b_bram_config_3/*.xci
+
+VHDL/block_rams/a_bram_config_1/*
+!VHDL/block_rams/a_bram_config_1/*.xci
+VHDL/block_rams/a_bram_config_2/*
+!VHDL/block_rams/a_bram_config_2/*.xci
+VHDL/block_rams/a_bram_config_3/*
+
+VHDL/block_rams/primes_config_1/*
+!VHDL/block_rams/primes_config_1/*.xci
+VHDL/block_rams/primes_config_2/*
+!VHDL/block_rams/primes_config_2/*.xci
+VHDL/block_rams/primes_config_3/*
+!VHDL/block_rams/primes_config_3/*.xci
