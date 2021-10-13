@@ -18,8 +18,7 @@ use work.data_types.all;
 
 entity log is
     Port ( input : in STD_LOGIC_vector(n_bits - 1 downto 0);
-           res : out integer range 0 to n_bits - 1;
-           rng_start: out std_logic);   --start signal for random number generator
+           res : out integer range 0 to n_bits - 1);   --start signal for random number generator
 end log;
 
 
@@ -35,7 +34,6 @@ begin
                 if (input(i) = '1' and flag = '0') then
                     res <= i;
                     flag := '1';
-                    rng_start <= '1';
                 end if;
                 
         end loop;
