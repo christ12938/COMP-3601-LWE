@@ -32,19 +32,21 @@ use IEEE.NUMERIC_STD.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity encrypt is
+entity encrypt_combinational is
     Port ( clk : in STD_LOGIC;
-           start : in STD_LOGIC;
-           sampleA : in myVector;
-           sampleB : in array_t;
-           q : in unsigned;
+           start : in std_logic;
+           start_mod : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           A_row : in array_t(0 to a_width-1);
+           B_element : in unsigned(n_bits - 1 downto 0);
+           q : in unsigned(n_bits - 1 downto 0);
            M : in STD_LOGIC;
            encryptedM : out encryptedMsg;
            done : out STD_LOGIC
            );
-end encrypt;
+end encrypt_combinational;
 
-architecture Behavioral of encrypt is
+architecture Behavioral of encrypt_combinational is
     component modulus_combinational is
        generic ( mul_bits : natural := mul_bits;
 	             n_bits : natural := n_bits);
@@ -54,32 +56,32 @@ architecture Behavioral of encrypt is
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
     
-  signal sample_sum_a : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
-  signal sample_sum_b : unsigned(mul_bits - 1 downto 0) := TO_UNSIGNED(0,mul_bits);
-  signal sample_mod_b : unsigned(n_bits - 1 downto 0) := TO_UNSIGNED(0,n_bits);
+  signal sample_sum_a : array_mul_t(0 to a_width-1);
+  signal sample_sum_b : unsigned(mul_bits - 1 downto 0);
+  signal sample_mod_b : unsigned(n_bits - 1 downto 0);
   signal dividends : array_mul_t(0 to 3);
-  signal dividend_b : unsigned(mul_bits-1 downto 0):= TO_UNSIGNED(0,mul_bits);
+  signal dividend_b : unsigned(mul_bits-1 downto 0);
   signal remainders : array_t(0 to 3);
-  signal row_a : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
-  signal element_b : unsigned(n_bits - 1 downto 0) := TO_UNSIGNED(0,n_bits);
-  signal sumation_done : std_logic := '0';
   
 begin
  
-rowAdder : process(row_a)
+rowAdder : process(A_row,B_element,reset)
     variable sum_a_temp : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
   begin
+    if reset='1' then
+        sample_sum_a <= (others => TO_UNSIGNED(0,mul_bits));
+        sample_sum_b <= TO_UNSIGNED(0,mul_bits);
+        
+        sum_a_temp := (others => TO_UNSIGNED(0,mul_bits));
+    elsif start = '1' then
+        for ii in 0 to a_width-1 loop
+            sum_a_temp(ii) := A_row(ii) + sample_sum_a(ii);
+        end loop;
     
-    if sumation_done = '0' and start='1' then
---      sample_sum_a <= sum_a_temp;
---      sample_sum_b <= element_b + sample_sum_b;
-
-      for ii in 0 to a_width-1 loop
-        sum_a_temp(ii) := TO_UNSIGNED(TO_INTEGER(row_a(ii)) + TO_INTEGER(sum_a_temp(ii)),mul_bits);
-      end loop;
-      sample_sum_a <= sum_a_temp;
-      sample_sum_b <= element_b + sample_sum_b;
+        sample_sum_a <= sum_a_temp;
+        sample_sum_b <= B_element + sample_sum_b;
     end if;
+    
  end process;
 
 modu0: modulus_combinational port map(
@@ -104,21 +106,11 @@ modu4: modulus_combinational port map(
             Modulo => sample_mod_b);
 
 controller : process(clk)
-variable count : integer := 0;
 variable index : integer := 0;
 variable start_index : integer := 0;
 variable mod_done : std_logic := '0';
 begin
-  if sumation_done = '0' then
-      if count = sample_size then
-            sumation_done <= '1';
-      else 
-        element_b <= sampleB(count);
-        row_a <= sampleA(count);
-        count := count + 1;
-    end if;
-  else
-    
+  if start_mod = '1' then
     if falling_edge(clk)and mod_done ='0' and index > 0 then
         start_index := index-3;
         encryptedM.u(start_index) <= remainders(0);
@@ -130,12 +122,14 @@ begin
         encryptedM.u(start_index) <= remainders(3);
         index := index + 1;
     end if;
+    
     if rising_edge(clk) and mod_done = '0' then
         if index = a_width then
             encryptedM.v <= sample_mod_b;
             mod_done := '1';
             done <= '1';
         else
+            done <= '0';
 --            sample_sum_b <= sample_sum_b;
             if M ='1' then
                 dividend_b <= sample_sum_b + resize(shift_right(q, 1),mul_bits);
@@ -151,6 +145,11 @@ begin
             dividends(3) <= sample_sum_a(index);
         end if;
     end if;
+  else
+    done <= '0';
+    index := 0;
+    mod_done := '0';
+    start_index := 0;
   end if;
 end process;
 end Behavioral;
