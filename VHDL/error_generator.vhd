@@ -44,18 +44,12 @@ end error_generator;
 architecture Behavioral of error_generator is
     component uniform_rng
   
-      Port ( prime : in STD_LOGIC_vector (n_bits - 1 downto 0);
+      Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
              seed  : in STD_LOGIC_VECTOR ( n_bits * 2 - 1 downto 0);
              clk,reset,start_signal   :in std_logic; 
-             width        :in integer;
              random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
   end component;
   
- component log 
-    port ( input: in std_logic_vector(n_bits - 1 downto 0);
-            res : out integer range 0 to n_bits - 1;
-            rng_start: out std_logic);
-    end component;
     signal rn_range : integer;
     signal rn_range_vector : std_logic_vector(n_bits - 1 downto 0);
     signal width: integer;
@@ -66,16 +60,15 @@ begin
     rn_range <= 2 * max_cap;
     rn_range_vector <=  std_logic_vector(to_unsigned(rn_range, n_bits));
    
-    get_log : log port map ( input => rn_range_vector,
-                            res => width,
-                            rng_start => fake_signal );
+--    get_log : log port map ( input => rn_range_vector,
+--                            res => width,
+--                            rng_start => fake_signal );
                             
-    uut: uniform_rng  port map ( prime         => rn_range_vector,
+    uniform_generator : uniform_rng port map ( cap         => rn_range_vector,
                                  seed          => std_logic_vector(SEED),
                                  clk           => clk,
                                  reset         => reset,
                                  start_signal  => fake_signal,
-                                 width         => width,
                                  random_number => random_number_signal );
     
     process(clk, reset)

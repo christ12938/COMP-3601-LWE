@@ -19,10 +19,9 @@ architecture behavioural of gen_q is
 	-- Random number generator
 	component uniform_rng
 		port (
-			prime : in std_logic_vector(n_bits - 1 downto 0);
+			cap : in std_logic_vector(n_bits - 1 downto 0);
 			seed : in std_logic_vector(n_bits * 2 - 1 downto 0);
 			clk, reset, start_signal : in std_logic;
-			width : in integer := n_bits - 1;
 			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
 	end component;
@@ -66,8 +65,7 @@ begin
 		start_signal => start_rng,
 --		seed => x"d545",
 		seed => std_logic_vector(seed),
-		prime => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),
-		width => primes_bram_address_width - 1,
+		cap => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),
 		unsigned(random_number) => random_number
 	);
 

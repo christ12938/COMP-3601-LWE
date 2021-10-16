@@ -40,10 +40,9 @@ end key_generation;
 architecture behavioural of key_generation is
 	component uniform_rng
 		port (
-			prime : in std_logic_vector(n_bits - 1 downto 0);
+			cap : in std_logic_vector(n_bits - 1 downto 0);
 			seed : in std_logic_vector(n_bits * 2 - 1 downto 0);
 			clk, reset, start_signal : in std_logic;
-			width : in integer := n_bits;
 			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
 	end component;
@@ -118,7 +117,7 @@ begin
 		a_row_generator : uniform_rng
 		port map (
 			seed => std_logic_vector(SEED + i * 1000),
-			prime => std_logic_vector(to_unsigned(max_q, n_bits)),
+			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
 			clk => clock,
 			reset => reset,
 			unsigned(random_number) => rng_out(i),
