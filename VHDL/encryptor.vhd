@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 13.10.2021 14:23:51
--- Design Name: 
+-- Design Name:
 -- Module Name: encryptor - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -55,7 +55,7 @@ architecture Behavioral of encryptor is
             -- e.g. width => n_bits - 1, not width = n_bits
             random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
     end component;
-    
+
     component encrypt_combinational is
         Port ( clk : in STD_LOGIC;
                start : in std_logic;
@@ -69,7 +69,7 @@ architecture Behavioral of encryptor is
                done : out STD_LOGIC
                );
     end component;
-    
+
     signal index : std_logic_vector(n_bits - 1 downto 0);
     signal got_all_data : std_logic;
 begin
@@ -90,13 +90,13 @@ begin
         got_all_data <= '0';
 --        index <= (others => '0');
     elsif start = '1' and rising_edge(clk) then
-        if count = sample_size then
+        if count = sample_size - 1 then
             got_all_data <= '1';
         else
             index_a <= unsigned(index);
-            index_b <= unsigned(index);  
-            count := count + 1;              
-        end if;   
+            index_b <= unsigned(index);
+            count := count + 1;
+        end if;
     end if;
 end process;
 

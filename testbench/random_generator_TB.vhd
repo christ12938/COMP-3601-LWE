@@ -32,18 +32,18 @@ architecture bench of TB is
 
 component uniform_rng
 
-      Port ( prime : in STD_LOGIC_vector (n_bits - 1 downto 0);
+      Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
              seed  : in STD_LOGIC_VECTOR ( n_bits * 2 - 1 downto 0);
              clk,reset,start_signal   :in std_logic;
-             width        :in integer;
+--             width        :in integer;
              random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
   end component;
 
-component log
-   port ( input: in std_logic_vector(n_bits - 1 downto 0);
-           res : out integer range 0 to n_bits - 1;
-           rng_start: out std_logic);
-   end component;
+--component log
+--   port ( input: in std_logic_vector(n_bits - 1 downto 0);
+--           res : out integer range 0 to n_bits - 1;
+--           rng_start: out std_logic);
+--   end component;
 
  component error_generator
     Port ( max_cap : in integer;
@@ -56,23 +56,23 @@ component log
   signal clk,reset,rng_start: std_logic :='0';
   signal random_number: STD_LOGIC_vector(n_bits - 1 downto 0);
   signal log_res :  integer range 0 to n_bits - 1;
---  signal error: integer;
+  signal error: integer;
   constant clock_period: time := 1 ns;
   signal stop_the_clock: boolean;
 
 begin
 
 
-  get_log : log port map ( input => prime,
-                           res => log_res,
-                           rng_start => rng_start);
+--  get_log : log port map ( input => prime,
+--                           res => log_res,
+--                           rng_start => rng_start);
 
-  uut: uniform_rng  port map ( prime         => prime,
+  uut: uniform_rng  port map ( cap         => prime,
                                  seed          => seed,
                                  clk           => clk,
                                  reset         => reset,
                                  start_signal  => rng_start,
-                                 width         => log_res,
+--                                 width         => log_res,
                                  random_number => random_number );
 
   erro: error_generator port map  ( max_cap =>5,
@@ -89,6 +89,7 @@ begin
     reset <= '1';
     wait for 5 ns;
     reset <= '0';
+    rng_start <= '1';
     wait for 1000 ns;
 
     -- Put test bench stimulus code here

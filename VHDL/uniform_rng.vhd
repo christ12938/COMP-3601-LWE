@@ -36,7 +36,7 @@ architecture Behavioral of uniform_rng is
         port ( input: in std_logic_vector(n_bits - 1 downto 0);
            res : out integer range 0 to n_bits - 1);
     end component;
-   
+
 signal rand : std_logic_vector(n_bits * 2 - 1 downto 0) := SEED;
 signal feedback : std_logic;
 signal generated_rand : std_logic_vector(n_bits - 1 downto 0) ; --initilise to 0 (smallet possilbe value=1)
@@ -45,14 +45,14 @@ signal cap_int : integer;
 -- Make sure the width has the - 1 already otherwise Vivado gives you a weird error!
 -- e.g. width => n_bits - 1, not width = n_bits
 signal width : integer range 0 to n_bits - 1;        -- log of cap which will be used to set the max map cap on the random number max : 2^width
- 
+
 begin
 
 
 
     get_log : log port map ( input => cap,
                            res => width);
-                           
+
 	feedback <= not((rand(0) xor rand(3)));           -- TODO: replace this with primitive polynomial of degree 24 to have maximum length
 
 	-- uniform random number generation credit: https://hforsten.com/generating-normally-distributed-pseudorandom-numbers-on-a-fpga.html
