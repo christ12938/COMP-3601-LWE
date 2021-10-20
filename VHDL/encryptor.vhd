@@ -40,7 +40,7 @@ entity encryptor is
            data_b : in unsigned(n_bits - 1 downto 0);
            q : in  unsigned(n_bits - 1 downto 0);
            M : in STD_LOGIC;
-           index_a : out unsigned(b_bram_address_width - 1 downto 0);
+           index_a : out unsigned(a_bram_address_width - 1 downto 0);
            index_b : out unsigned(b_bram_address_width - 1 downto 0);
            encrypted_m : out encryptedMsg;
            done : out STD_LOGIC);
@@ -70,8 +70,9 @@ architecture Behavioral of encryptor is
                );
     end component;
 
-    signal index : std_logic_vector(n_bits - 1 downto 0);
+    signal index : std_logic_vector(a_bram_address_width - 1 downto 0);
     signal got_all_data : std_logic;
+    signal rng_out : std_logic_vector(n_bits - 1 downto 0);
 begin
 
 random_index_generator : uniform_rng port map(
@@ -80,8 +81,10 @@ random_index_generator : uniform_rng port map(
     clk => clk,
     reset => reset,
     start_signal => start,
-    random_number => index
+    random_number => rng_out
 );
+index <= std_logic_vector(resize(unsigned(rng_out), index'length));
+
 process(clk,reset)
 variable count : integer := 0;
 begin

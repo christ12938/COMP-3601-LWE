@@ -315,7 +315,7 @@ begin
 
 		when s_finished =>
 			done <= '1';
-			report "Key generation finished" severity note;
+			-- report "Key generation finished" severity note;
 
 		when others =>
 			report "Key generation in an invalid state" severity error;
