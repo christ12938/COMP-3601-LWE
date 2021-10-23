@@ -6,14 +6,14 @@ use work.data_types.all;
 
 entity lwe is
 	port (
-		main_clock, decryption_clock : in std_logic;
+		clock_a, clock_b, clock_c : in std_logic;
 
 		-- ----------------------------- Data Signals --------------------------------
 		plaintext_in : in std_logic;
 		cyphertext_in : in encryptedMsg;
 
 		plaintext_out : out std_logic;
-		cyphertext : out encryptedMsg;
+		cyphertext_out : out encryptedMsg;
 
 		-- ---------------------------- Control Signals ------------------------------
 		start : in std_logic;
@@ -208,16 +208,16 @@ architecture behavioural of lwe is
 begin
 	-- ------------------------------- Master FSM ---------------------------------
 	-- State transition
-	process(main_clock, reset) begin
+	process(clock_a, reset) begin
 		if reset = '1' then
 			current_state <= S_KEY_GEN_IDLE;
-		elsif rising_edge(main_clock) then
+		elsif rising_edge(clock_a) then
 			current_state <= next_state;
 		end if;
 	end process;
 
 	-- State logic
-	process(current_state, main_clock, start, key_generation_done, encryption_done)
+	process(current_state, clock_a, start, key_generation_done, encryption_done)
 	begin
 		next_state <= current_state;
 		start_key_generation <= '0';
@@ -284,7 +284,7 @@ begin
 
 	key_gen : key_generation
 	port map (
-		clock => main_clock,
+		clock => clock_a,
 		reset => reset,
 		start => start,
 		a_in => a_bram_data_out_array,
@@ -305,7 +305,7 @@ begin
 
 	encryption : encryptor
 	port map (
-		clk => main_clock,
+		clk => clock_a,
 		start => start_encryption,
 		reset => reset_encryption,
 		data_a => a_bram_data_out_array,
@@ -314,7 +314,7 @@ begin
 		m => plaintext_in,
 		index_a => a_bram_address_encrypt,
 		index_b => b_bram_address_encrypt,
-		encrypted_m => cyphertext,
+		encrypted_m => cyphertext_out,
 		done => encryption_done
 	);
 	reset_encryption <= reset or encryption_synchronous_reset;
@@ -325,7 +325,7 @@ begin
 		d => std_logic_vector(q_reg_in),
 		e => q_valid,
 		reset => reset,
-		clock => main_clock,
+		clock => clock_a,
 		unsigned(q) => q_reg_out
 	);
 
@@ -336,7 +336,7 @@ begin
 		d(0) => '1',
 		e => key_gen_done_reg_enable,
 		reset => reset,
-		clock => main_clock,
+		clock => clock_a,
 		q(0) => key_gen_done_reg_out
 	);
 	key_generation_done_out <= key_gen_done_reg_out;
@@ -348,7 +348,7 @@ begin
 			d => std_logic_vector(s_reg_in(i)),
 			e => s_valid,
 			reset => reset,
-			clock => main_clock,
+			clock => clock_a,
 			unsigned(q) => s_reg_out(i)
 		);
 	end generate;
@@ -359,7 +359,7 @@ begin
 		a_bram : a_bram_config_1
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -370,7 +370,7 @@ begin
 		a_bram : a_bram_config_2
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -381,7 +381,7 @@ begin
 		a_bram : a_bram_config_3
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -394,7 +394,7 @@ begin
 		a_bram : b_bram_config_1
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -405,7 +405,7 @@ begin
 		a_bram : b_bram_config_2
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -416,7 +416,7 @@ begin
 		a_bram : b_bram_config_3
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,

@@ -49,7 +49,7 @@ package data_types is
 	type array_t is array(natural range <>) of unsigned(n_bits - 1 downto 0);
 
 	-- myVector is a matrix
-	type myVector is array(natural range <>) of array_mul_t(0 to a_width - 1);
+	type myVector is array(natural range <>) of array_t(0 to a_width - 1);
 
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
 	-- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
@@ -65,7 +65,7 @@ package body data_types is
 	function a_width return natural is
 	begin
 		case CONFIG is
---		when 1 => return 8 -- for encryption testing
+		-- when 1 => return 8; -- for encryption testing
 		when 1 => return 4;
 		when 2 => return 8;
 		when 3 => return 16;
@@ -76,7 +76,7 @@ package body data_types is
 	function a_height return natural is
 	begin
 		case CONFIG is
---		when 1 => return 8; -- for encryption testing
+		-- when 1 => return 8; -- for encryption testing
 		when 1 => return 256;
 		when 2 => return 8192;
 		when 3 => return 32768;
