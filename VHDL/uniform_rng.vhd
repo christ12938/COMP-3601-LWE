@@ -53,7 +53,7 @@ begin
     get_log : log port map ( input => cap,
                            res => width);
 
-	feedback <= not((rand(0) xor rand(3)));           -- TODO: replace this with primitive polynomial of degree 24 to have maximum length
+	feedback <= rand(31) xnor rand(21) xnor rand(1) xnor rand(0);           -- TODO: replace this with primitive polynomial of degree 24 to have maximum length
 
 	-- uniform random number generation credit: https://hforsten.com/generating-normally-distributed-pseudorandom-numbers-on-a-fpga.html
 	process(clk,reset)
