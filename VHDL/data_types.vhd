@@ -37,8 +37,13 @@ package data_types is
 	constant b_bram_data_width : natural := a_bram_data_width;
 	constant b_bram_address_width : natural := a_bram_address_width;
 
+	-- Master seed for the seed generator, always 32 bits
+	-- FIXME currently set to 64 bits for experimentation
+	constant MASTER_SEED : unsigned(63 downto 0) := b"1101100111111001100100110001110011110010001000100010000010000100";
+
 	-- Seed for the random number generator
 	-- Number will just be truncated when n_bits is smaller
+	-- FIXME deprecated
 	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(923456847, n_bits * 2);
 
 	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
