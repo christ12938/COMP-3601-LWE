@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 06.10.2021 23:40:58
--- Design Name: 
+-- Design Name:
 -- Module Name: encrypt - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -48,40 +48,40 @@ end encrypt_combinational;
 
 architecture Behavioral of encrypt_combinational is
     component modulus_combinational is
-       generic ( mul_bits : natural := mul_bits;
-	             n_bits : natural := n_bits);
+       generic ( dividend_width : natural := mul_bits;
+	             divisor_width : natural := n_bits);
 	   Port(
 			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
-    
+
   signal sample_sum_a : array_mul_t(0 to a_width-1);
   signal sample_sum_b : unsigned(mul_bits - 1 downto 0);
   signal sample_mod_b : unsigned(n_bits - 1 downto 0);
   signal dividends : array_mul_t(0 to 3);
   signal dividend_b : unsigned(mul_bits-1 downto 0);
   signal remainders : array_t(0 to 3);
-  
+
 begin
- 
+
 rowAdder : process(A_row,B_element,reset)
     variable sum_a_temp : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
   begin
     if reset='1' then
         sample_sum_a <= (others => TO_UNSIGNED(0,mul_bits));
         sample_sum_b <= TO_UNSIGNED(0,mul_bits);
-        
+
         sum_a_temp := (others => TO_UNSIGNED(0,mul_bits));
     elsif start = '1' then
         for ii in 0 to a_width-1 loop
             sum_a_temp(ii) := A_row(ii) + sample_sum_a(ii);
         end loop;
-    
+
         sample_sum_a <= sum_a_temp;
         sample_sum_b <= B_element + sample_sum_b;
     end if;
-    
+
  end process;
 
 modu0: modulus_combinational port map(
@@ -122,7 +122,7 @@ begin
         encryptedM.u(start_index) <= remainders(3);
         index := index + 1;
     end if;
-    
+
     if rising_edge(clk) and mod_done = '0' then
         if index = a_width then
             encryptedM.v <= sample_mod_b;

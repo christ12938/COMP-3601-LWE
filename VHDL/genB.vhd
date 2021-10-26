@@ -32,6 +32,8 @@ use work.data_types.ALL;
 entity genB is
     Port(   Clock, Reset, Start : in std_logic;
             A, S : in array_t (0 to a_width-1);
+            seed : in unsigned(63 downto 0);
+            seed_valid : in std_logic;
             Q : in unsigned (n_bits - 1 DOWNTO 0);
             B : out unsigned(n_bits - 1 DOWNTO 0);
             Done : out std_logic);
@@ -45,20 +47,19 @@ architecture Behavioral of genB is
 		);
 	   Port ( A : in array_mul_t;
             S : in array_mul_t;
---            reset, start : in std_logic;
             result : out unsigned);
     end component;
 
     component error_generator is
         Port ( max_cap : in integer;
             clk,reset,start_signal   :in std_logic;
+            seed : in unsigned(63 downto 0);
+            seed_valid : in std_logic;
             done     : out std_logic;
             error    : out integer);
     end component;
 
     component modulus_combinational is
-       generic ( mul_bits : natural := mul_bits;
-	             n_bits : natural := n_bits);
 	   Port(
 			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
@@ -129,6 +130,8 @@ begin
             max_cap => 1,
             clk => Clock,
             reset => Reset,
+            seed => seed,
+            seed_valid => seed_valid,
             start_signal => modulue_start,
             done => errorGen_done,
             error => errorGen_result);

@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 3;
+	constant CONFIG : natural := 1;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
@@ -37,14 +37,53 @@ package data_types is
 	constant b_bram_data_width : natural := a_bram_data_width;
 	constant b_bram_address_width : natural := a_bram_address_width;
 
+	-- ----------------------------------------------------------------------------
+	--                                  Seeding
+	-- ----------------------------------------------------------------------------
 	-- Master seed for the seed generator, always 32 bits
 	-- FIXME currently set to 64 bits for experimentation
-	constant MASTER_SEED : unsigned(63 downto 0) := b"1101100111111001100100110001110011110010001000100010000010000100";
+	-- constant MASTER_SEED : unsigned(63 downto 0) := b"1101100111111001100100110001110011110010001000100010000010000100";
 
 	-- Seed for the random number generator
 	-- Number will just be truncated when n_bits is smaller
 	-- FIXME deprecated
-	constant SEED : unsigned(63 downto 0) := x"0000000000000000";
+--	constant SEED : unsigned(63 downto 0) := x"0000000000000000";
+
+	-- We don't need 20 seeds but just in case
+	constant NUM_SEEDS : positive := 20;
+	type seed_array_t is array(natural range 0 to NUM_SEEDS - 1) of unsigned(63 downto 0);
+	-- Indices 0 to 15 are reserved for rng_bank
+	-- Index 16 is reserved for gen_q
+	-- Index 17 is reserved for gen_b
+	constant SEEDS : seed_array_t := (
+		-- Reserved for rng_bank
+		x"93716937efeba65e",
+		x"08efa0dd8e94d2bf",
+		x"5d1a59e195ea7040",
+		x"5eee7a5e2e09b8f8",
+		x"fc02afd93f7a2f27",
+		x"10bd85ba8655757b",
+		x"860b9fd23e435a05",
+		x"cefb65e866be0134",
+		x"b17daf7b14789b7b",
+		x"35783c0925e3311c",
+		x"4a59c752b5d47f6f",
+		x"ef55da3d82ee505e",
+		x"4a76ce137a4cd553",
+		x"3edffcdc258255c0",
+		x"2bb40c42af7d1474",
+		x"a6f80b881de37a1c",
+		-- Reserved for gen_q
+		x"79600dfbd716292a",
+		-- Reserved for gen_b
+		x"7990e60be863c92c",
+		-- Reserved for encryptor
+		x"2ca662617cf9e4bc",
+		-- Unreserved
+		x"abf14d44f40fe0f7"
+	);
+
+
 
 	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 

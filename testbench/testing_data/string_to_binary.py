@@ -1,3 +1,10 @@
+"""
+Reads characters from stdin and prints it in binary
+
+Deprecated, this logic is done in VHDL now
+"""
+
+
 import sys
 
 

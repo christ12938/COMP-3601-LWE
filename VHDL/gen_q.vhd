@@ -10,7 +10,8 @@ entity gen_q is
 	port (
 		clock : in std_logic;
 		reset : in std_logic;
-		seed : in unsigned(n_bits * 2 - 1 downto 0);
+		seed : in unsigned(63 downto 0);
+		seed_valid : in std_logic;
 		random_prime : out unsigned(n_bits - 1 downto 0)
 	);
 end gen_q;
@@ -20,7 +21,7 @@ architecture behavioural of gen_q is
 	component uniform_rng
 		port (
 			cap : in std_logic_vector(n_bits - 1 downto 0);
-			seed : in std_logic_vector(n_bits * 2 - 1 downto 0);
+			seed : in std_logic_vector(63 downto 0);
 			clk, reset, start_signal : in std_logic;
 			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
@@ -61,9 +62,8 @@ begin
 	rng : uniform_rng
 	port map (
 		clk => clock,
-		reset => reset,
+		reset => reset or seed_valid,
 		start_signal => start_rng,
---		seed => x"d545",
 		seed => std_logic_vector(seed),
 		cap => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),
 		unsigned(random_number) => random_number

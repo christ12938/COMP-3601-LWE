@@ -13,7 +13,7 @@ entity lwe is
 		cyphertext_in : in encryptedMsg;
 
 		plaintext_out : out std_logic;
-		cyphertext_out : out encryptedMsg;
+		cyphertext_out : inout encryptedMsg;
 
 		-- ---------------------------- Control Signals ------------------------------
 		start : in std_logic;
@@ -56,6 +56,13 @@ architecture behavioural of lwe is
 			s_out : out array_t(0 to s_height - 1);
 			s_valid : out std_logic
 		);
+	end component;
+
+	-- ------------------------------- Decryption ---------------------------------
+	component decrypt is
+    Port(   U, S : in array_t (0 to a_width-1);
+            V, Q : in unsigned (n_bits - 1 DOWNTO 0);
+            M    : out std_logic);
 	end component;
 
 	-- ------------------------------- Block RAMs ---------------------------------
@@ -182,11 +189,13 @@ architecture behavioural of lwe is
 	signal b_bram_address : unsigned(b_bram_address_width - 1 downto 0);
 	signal b_bram_write_enable : std_logic := '0';
 
+	signal encrypt_a_bram_data : array_t(0 to a_width - 1);
+	signal encrypt_b_bram_data : unsigned(n_bits - 1 downto 0);
+
 	signal a_bram_address_key_gen, a_bram_address_encrypt : unsigned(a_bram_address_width - 1 downto 0);
 	signal b_bram_address_key_gen, b_bram_address_encrypt : unsigned(b_bram_address_width - 1 downto 0);
 
 	type bram_address_control_t is (
-		-- NO_CONTROL,
 		KEY_GENERATION_CONTROL,
 		ENCRYPTION_CONTROL
 	);
@@ -217,7 +226,7 @@ begin
 	end process;
 
 	-- State logic
-	process(current_state, clock_a, start, key_generation_done, encryption_done)
+	process(current_state, clock_a, start, key_generation_done)
 	begin
 		next_state <= current_state;
 		start_key_generation <= '0';
@@ -226,6 +235,9 @@ begin
 		bram_address_control <= ENCRYPTION_CONTROL;
 		encryption_done_out <= '0';
 		encryption_synchronous_reset <= '0';
+
+		encrypt_a_bram_data <= (others => (others => '0'));
+		encrypt_b_bram_data <= (others => '0');
 
 		case current_state is
 		when S_KEY_GEN_IDLE =>
@@ -243,14 +255,19 @@ begin
 			end if;
 
 		when S_ENCRYPT_IDLE =>
+			bram_address_control <= KEY_GENERATION_CONTROL;
 			if start = '1' then
 				start_encryption <= '1';
 				next_state <= S_ENCRYPT_WORK;
+			else
+				encryption_synchronous_reset <= '1';
 			end if;
 
 		when S_ENCRYPT_WORK =>
-			bram_address_control <= ENCRYPTION_CONTROL;
 			start_encryption <= '1';
+
+			encrypt_a_bram_data <= a_bram_data_in_array;
+			encrypt_b_bram_data <= b_bram_data_in;
 
 			if encryption_done = '1' then
 				encryption_synchronous_reset <= '1';
@@ -308,8 +325,8 @@ begin
 		clk => clock_a,
 		start => start_encryption,
 		reset => reset_encryption,
-		data_a => a_bram_data_out_array,
-		data_b => b_bram_data_out,
+		data_a => encrypt_a_bram_data,
+		data_b => encrypt_b_bram_data,
 		q => q_reg_out,
 		m => plaintext_in,
 		index_a => a_bram_address_encrypt,
@@ -318,6 +335,19 @@ begin
 		done => encryption_done
 	);
 	reset_encryption <= reset or encryption_synchronous_reset;
+
+	decryption : decrypt
+	port map (
+		u => cyphertext_out.u,
+		s => s_reg_out,
+		v => cyphertext_out.v,
+		q => q_reg_out,
+		m => plaintext_out
+	);
+
+
+
+
 
 	q_register : register_async_reset
 	generic map (n => n_bits)

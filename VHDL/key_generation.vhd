@@ -41,7 +41,7 @@ architecture behavioural of key_generation is
 	component uniform_rng
 		port (
 			cap : in std_logic_vector(n_bits - 1 downto 0);
-			seed : in std_logic_vector(n_bits * 2 - 1 downto 0);
+			seed : in std_logic_vector(63 downto 0);
 			clk, reset, start_signal : in std_logic;
 			random_number : out std_logic_vector(n_bits - 1 downto 0)
 		);
@@ -51,7 +51,8 @@ architecture behavioural of key_generation is
 		port (
 			clock : in std_logic;
 			reset : std_logic;
-			seed : in unsigned(n_bits * 2 - 1 downto 0);
+			seed : in unsigned(63 downto 0);
+			seed_valid : in std_logic;
 			random_prime : out unsigned(n_bits - 1 downto 0)
 		);
 	end component;
@@ -60,16 +61,35 @@ architecture behavioural of key_generation is
 		port (
 			clock, reset, start : in std_logic;
 			A, S : in array_t(0 to a_width - 1);
+			seed : in unsigned(63 downto 0);
+			seed_valid : in std_logic;
 			Q : in unsigned(n_bits - 1 downto 0);
 			B : out unsigned(n_bits - 1 downto 0);
 			done : out std_logic
 		);
 	end component;
 
+	-- component seed_generator is
+	-- 	port (
+	-- 		master_seed : in unsigned(63 downto 0);
+	-- 		clock, reset, start : in std_logic;
+	-- 		random_number : out unsigned(31 downto 0)
+	-- 	);
+	-- end component;
+
+	-- Seed generation signals
+	signal rng_bank_seed_valid : std_logic_vector(0 to a_width - 1) := (others => '0');
+	signal gen_q_seed_valid, gen_b_seed_valid : std_logic := '0';
+	signal seed_gen_out : unsigned(31 downto 0);
+	-- Number of random number generators that need seeding
+	-- +2 for gen_q and gen_b
+	constant NUM_GENERATORS : positive := a_width + 2;
+
 	signal rng_out : array_t(0 to a_width - 1);
 
 	type key_gen_state is (
 		s_idle,
+		s_gen_seeds,
 		s_gen_q,
 		s_gen_s,
 		s_gen_a,
@@ -100,26 +120,39 @@ architecture behavioural of key_generation is
 	signal counter_c_enable : std_logic := '0';
 	signal counter_c : integer range 0 to GEN_B_CLOCKS := 0;
 	signal counter_c_reset_synchronous : std_logic := '0';
-
 begin
+	-- Seed generation
+	-- seed_gen : seed_generator
+	-- port map (
+	-- 	master_seed => MASTER_SEED,
+	-- 	clock => clock,
+	-- 	reset => reset,
+	-- 	start => '1',
+	-- 	random_number => seed_gen_out
+	-- );
+
+
 	-- Prime generation
 	prime_generator : gen_q
 	port map (
 		clock => clock,
 		reset => reset,
-		seed => SEED,
+		-- seed => seed_gen_out,
+		seed => SEEDS(16),
+		seed_valid => gen_q_seed_valid,
 		random_prime => q_out
 	);
 
 	-- Generate a_width generators, these generators are used for A and s
-	a_row_generators : for i in 0 to a_width - 1 generate
+	rng_bank : for i in 0 to a_width - 1 generate
 		-- Vivado complains if I don't do this with a separate signal
-		a_row_generator : uniform_rng
+		rng : uniform_rng
 		port map (
-			seed => std_logic_vector(SEED + i * 1000),
+			-- seed => std_logic_vector(seed_gen_out),
+			seed => std_logic_vector(SEEDS(i)),
 			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
 			clk => clock,
-			reset => reset,
+			reset => reset or rng_bank_seed_valid(i),
 			unsigned(random_number) => rng_out(i),
 			start_signal => '1'
 		);
@@ -144,6 +177,8 @@ begin
 		Clock => clock,
 		Reset => reset,
 		Start => gen_b_start,
+		seed => SEEDS(17),
+		seed_valid => gen_b_seed_valid,
 		A => a_in,
 		S => s_in,
 		Q => q_in,
@@ -222,11 +257,41 @@ begin
 		counter_b_reset_synchronous <= '0';
 		counter_c_reset_synchronous <= '0';
 
+		gen_q_seed_valid <= '0';
+		gen_b_seed_valid <= '0';
+		rng_bank_seed_valid <= (others => '0');
+
 		case current_state is
 		when s_idle =>
 			if start = '1' then
 				next_state <= s_gen_q;
 			end if;
+
+		-- when s_gen_seeds =>
+		-- 	-- Seed generation
+		-- 	-- Use counter A
+		-- 	counter_a_enable <= '1';
+
+		-- 	if counter_a = NUM_GENERATORS - 1 then
+		-- 		-- Counter done, everything has been seeded
+		-- 		counter_a_reset_synchronous <= '1';
+		-- 		next_state <= s_gen_q;
+		-- 	end if;
+
+		-- 	if counter_a = NUM_GENERATORS - 1 - 1 then
+		-- 		-- gen_q's turn for seed
+		-- 		gen_q_seed_valid <= '1';
+		-- 	end if;
+
+		-- 	if counter_a = NUM_GENERATORS - 1 - 2 then
+		-- 		-- gen_b's turn for seed
+		-- 		gen_b_seed_valid <= '1';
+		-- 	end if;
+
+		-- 	if counter_a < a_width then
+		-- 		-- rng_bank's turn for seed
+		-- 		rng_bank_seed_valid(counter_a) <= '1';
+		-- 	end if;
 
 		when s_gen_q =>
 			-- The random number generators are connected to q_out and are always running
@@ -287,8 +352,8 @@ begin
 				b_valid <= '1';
 			end if;
 
-			if counter_c = GEN_B_CLOCKS - 1 - 2 then
-				-- Pre-emptively increment the A block RAM address 2 clocks before gen_b is expected to finish (because the block RAM takes 2 clocks to update)
+			if counter_c = GEN_B_CLOCKS - 1 - 1 then
+				-- Pre-emptively increment the A block RAM address 1 clock before gen_b is expected to finish (because the block RAM takes 2 clocks to update)
 				counter_a_enable <= '1';
 			end if;
 
