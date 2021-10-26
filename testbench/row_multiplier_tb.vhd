@@ -18,10 +18,10 @@ architecture bench of rowMul_tb is
              result : out unsigned);
   end component;
 
-  signal A: array_mul_t;
-  signal S: array_mul_t;
+  signal A: array_mul_t(15 downto 0);
+  signal S: array_mul_t(15 downto 0);
   signal reset, start: std_logic;
-  signal result: unsigned;
+  signal result: unsigned(15 downto 0);
 
 begin
 
