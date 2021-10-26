@@ -34,7 +34,7 @@ architecture bench of TB is
 component uniform_rng
 
       Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
-             seed  : in STD_LOGIC_VECTOR ( n_bits * 2 - 1 downto 0);
+             seed  : in STD_LOGIC_VECTOR ( 63 downto 0);
              clk,reset,start_signal   :in std_logic;
              random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
   end component;
@@ -66,9 +66,8 @@ begin
     file_open(file_RESULTS, path, write_mode);
     file_close(file_RESULTS);
     reset <= '1';
-    wait for 5 ns;
+    wait for 1 ns;
     reset <= '0';
-    wait for 5 ns;
     rng_start <= '1';
     -- Put test bench stimulus code here
     wait;

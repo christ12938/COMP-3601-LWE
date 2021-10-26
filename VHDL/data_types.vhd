@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 2;
+	constant CONFIG : natural := 3;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
@@ -44,7 +44,7 @@ package data_types is
 	-- Seed for the random number generator
 	-- Number will just be truncated when n_bits is smaller
 	-- FIXME deprecated
-	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(923456847, n_bits * 2);
+	constant SEED : unsigned(63 downto 0) := x"0000000000000000";
 
 	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 

@@ -1,4 +1,3 @@
-system('convert.exe');
 fileID = fopen('matlab_input.txt','r');
 type matlab_input.txt
 formatSpec = '%d';
