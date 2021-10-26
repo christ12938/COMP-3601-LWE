@@ -60,6 +60,6 @@ begin
      M <= '0' when dec < condition else
           '1';
 
-    -- M <= '1' when ((dec < (q / 4)) and (dec < 3 * q / 4)) else '0';
+    -- M <= '1' when ((q / 4) < dec and dec < (3 * q / 4)) else '0';
 
 end Behavioral;
