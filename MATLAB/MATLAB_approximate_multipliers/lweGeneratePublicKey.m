@@ -12,7 +12,7 @@ function [A, B] = lweGeneratePublicKey(s, q, keyHeight)
     end
     B = zeros(keyHeight,1);
     A = randi([0, q], keyHeight, height(s));
-    %e = round(randn(keyHeight, 1));
+%     e = round(randn(keyHeight, 1));
     % e = 0;
 %     for i = 1:keyHeight
 %        [new_element] = rowMul(A(i,:),s);
@@ -22,7 +22,8 @@ function [A, B] = lweGeneratePublicKey(s, q, keyHeight)
        [new_element] = rowMul(A(i,:),s);
        B(i) = mod(new_element,q); 
     end
-    %B = mod(A * s + e, q);
+%     disp("-------------------------------------");
+%     disp(mod(A * s, q)-B);
 
 end
 

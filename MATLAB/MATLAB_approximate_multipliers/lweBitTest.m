@@ -1,5 +1,5 @@
 secret = [50;6;70;8;9];
-q = 8191;
+q = 1049;
 keyHeight = 200;
 samples = 50;
 tests = 1e5;
