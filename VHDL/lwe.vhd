@@ -6,14 +6,14 @@ use work.data_types.all;
 
 entity lwe is
 	port (
-		main_clock, decryption_clock : in std_logic;
+		clock_a, clock_b, clock_c : in std_logic;
 
 		-- ----------------------------- Data Signals --------------------------------
 		plaintext_in : in std_logic;
 		cyphertext_in : in encryptedMsg;
 
 		plaintext_out : out std_logic;
-		cyphertext : out encryptedMsg;
+		cyphertext_out : inout encryptedMsg;
 
 		-- ---------------------------- Control Signals ------------------------------
 		start : in std_logic;
@@ -56,6 +56,13 @@ architecture behavioural of lwe is
 			s_out : out array_t(0 to s_height - 1);
 			s_valid : out std_logic
 		);
+	end component;
+
+	-- ------------------------------- Decryption ---------------------------------
+	component decrypt is
+    Port(   U, S : in array_t (0 to a_width-1);
+            V, Q : in unsigned (n_bits - 1 DOWNTO 0);
+            M    : out std_logic);
 	end component;
 
 	-- ------------------------------- Block RAMs ---------------------------------
@@ -182,11 +189,13 @@ architecture behavioural of lwe is
 	signal b_bram_address : unsigned(b_bram_address_width - 1 downto 0);
 	signal b_bram_write_enable : std_logic := '0';
 
+	signal encrypt_a_bram_data : array_t(0 to a_width - 1);
+	signal encrypt_b_bram_data : unsigned(n_bits - 1 downto 0);
+
 	signal a_bram_address_key_gen, a_bram_address_encrypt : unsigned(a_bram_address_width - 1 downto 0);
 	signal b_bram_address_key_gen, b_bram_address_encrypt : unsigned(b_bram_address_width - 1 downto 0);
 
 	type bram_address_control_t is (
-		-- NO_CONTROL,
 		KEY_GENERATION_CONTROL,
 		ENCRYPTION_CONTROL
 	);
@@ -208,16 +217,16 @@ architecture behavioural of lwe is
 begin
 	-- ------------------------------- Master FSM ---------------------------------
 	-- State transition
-	process(main_clock, reset) begin
+	process(clock_a, reset) begin
 		if reset = '1' then
 			current_state <= S_KEY_GEN_IDLE;
-		elsif rising_edge(main_clock) then
+		elsif rising_edge(clock_a) then
 			current_state <= next_state;
 		end if;
 	end process;
 
 	-- State logic
-	process(current_state, main_clock, start, key_generation_done, encryption_done)
+	process(current_state, clock_a, start, key_generation_done)
 	begin
 		next_state <= current_state;
 		start_key_generation <= '0';
@@ -226,6 +235,9 @@ begin
 		bram_address_control <= ENCRYPTION_CONTROL;
 		encryption_done_out <= '0';
 		encryption_synchronous_reset <= '0';
+
+		encrypt_a_bram_data <= (others => (others => '0'));
+		encrypt_b_bram_data <= (others => '0');
 
 		case current_state is
 		when S_KEY_GEN_IDLE =>
@@ -243,14 +255,19 @@ begin
 			end if;
 
 		when S_ENCRYPT_IDLE =>
+			bram_address_control <= KEY_GENERATION_CONTROL;
 			if start = '1' then
 				start_encryption <= '1';
 				next_state <= S_ENCRYPT_WORK;
+			else
+				encryption_synchronous_reset <= '1';
 			end if;
 
 		when S_ENCRYPT_WORK =>
-			bram_address_control <= ENCRYPTION_CONTROL;
 			start_encryption <= '1';
+
+			encrypt_a_bram_data <= a_bram_data_in_array;
+			encrypt_b_bram_data <= b_bram_data_in;
 
 			if encryption_done = '1' then
 				encryption_synchronous_reset <= '1';
@@ -284,7 +301,7 @@ begin
 
 	key_gen : key_generation
 	port map (
-		clock => main_clock,
+		clock => clock_a,
 		reset => reset,
 		start => start,
 		a_in => a_bram_data_out_array,
@@ -305,19 +322,32 @@ begin
 
 	encryption : encryptor
 	port map (
-		clk => main_clock,
+		clk => clock_a,
 		start => start_encryption,
 		reset => reset_encryption,
-		data_a => a_bram_data_out_array,
-		data_b => b_bram_data_out,
+		data_a => encrypt_a_bram_data,
+		data_b => encrypt_b_bram_data,
 		q => q_reg_out,
 		m => plaintext_in,
 		index_a => a_bram_address_encrypt,
 		index_b => b_bram_address_encrypt,
-		encrypted_m => cyphertext,
+		encrypted_m => cyphertext_out,
 		done => encryption_done
 	);
 	reset_encryption <= reset or encryption_synchronous_reset;
+
+	decryption : decrypt
+	port map (
+		u => cyphertext_out.u,
+		s => s_reg_out,
+		v => cyphertext_out.v,
+		q => q_reg_out,
+		m => plaintext_out
+	);
+
+
+
+
 
 	q_register : register_async_reset
 	generic map (n => n_bits)
@@ -325,7 +355,7 @@ begin
 		d => std_logic_vector(q_reg_in),
 		e => q_valid,
 		reset => reset,
-		clock => main_clock,
+		clock => clock_a,
 		unsigned(q) => q_reg_out
 	);
 
@@ -336,7 +366,7 @@ begin
 		d(0) => '1',
 		e => key_gen_done_reg_enable,
 		reset => reset,
-		clock => main_clock,
+		clock => clock_a,
 		q(0) => key_gen_done_reg_out
 	);
 	key_generation_done_out <= key_gen_done_reg_out;
@@ -348,7 +378,7 @@ begin
 			d => std_logic_vector(s_reg_in(i)),
 			e => s_valid,
 			reset => reset,
-			clock => main_clock,
+			clock => clock_a,
 			unsigned(q) => s_reg_out(i)
 		);
 	end generate;
@@ -359,7 +389,7 @@ begin
 		a_bram : a_bram_config_1
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -370,7 +400,7 @@ begin
 		a_bram : a_bram_config_2
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -381,7 +411,7 @@ begin
 		a_bram : a_bram_config_3
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -394,7 +424,7 @@ begin
 		a_bram : b_bram_config_1
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -405,7 +435,7 @@ begin
 		a_bram : b_bram_config_2
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -416,7 +446,7 @@ begin
 		a_bram : b_bram_config_3
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => main_clock,
+			clka => clock_a,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,

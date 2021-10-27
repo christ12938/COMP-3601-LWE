@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 05.10.2021 10:45:53
--- Design Name: 
+-- Design Name:
 -- Module Name: error_generator - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -37,19 +37,21 @@ use work.data_types.all;
 entity error_generator is
     Port ( max_cap : in integer;    -- max cap === min cap
            clk,reset,start_signal   :in std_logic;
+           seed : in unsigned(63 downto 0);
+           seed_valid : in std_logic;
            done     : out std_logic;
            error    : out integer);
 end error_generator;
 
 architecture Behavioral of error_generator is
     component uniform_rng
-  
+
       Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
-             seed  : in STD_LOGIC_VECTOR ( n_bits * 2 - 1 downto 0);
-             clk,reset,start_signal   :in std_logic; 
+             seed  : in STD_LOGIC_VECTOR ( 63 downto 0);
+             clk,reset,start_signal   :in std_logic;
              random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
   end component;
-  
+
     signal rn_range : integer;
     signal rn_range_vector : std_logic_vector(n_bits - 1 downto 0);
     signal width: integer;
@@ -59,18 +61,18 @@ architecture Behavioral of error_generator is
 begin
     rn_range <= 2 * max_cap;
     rn_range_vector <=  std_logic_vector(to_unsigned(rn_range, n_bits));
-   
+
 --    get_log : log port map ( input => rn_range_vector,
 --                            res => width,
 --                            rng_start => fake_signal );
-                            
+
     uniform_generator : uniform_rng port map ( cap         => rn_range_vector,
-                                 seed          => std_logic_vector(SEED),
+                                 seed          => std_logic_vector(seed),
                                  clk           => clk,
-                                 reset         => reset,
+                                 reset         => reset or seed_valid,
                                  start_signal  => fake_signal,
                                  random_number => random_number_signal );
-    
+
     process(clk, reset)
         variable sample :integer := 0;
         variable var: integer;
@@ -97,6 +99,6 @@ begin
             end if;
         end if;
     end process;
-    
+
 
 end Behavioral;

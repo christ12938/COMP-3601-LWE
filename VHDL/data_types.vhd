@@ -37,9 +37,53 @@ package data_types is
 	constant b_bram_data_width : natural := a_bram_data_width;
 	constant b_bram_address_width : natural := a_bram_address_width;
 
+	-- ----------------------------------------------------------------------------
+	--                                  Seeding
+	-- ----------------------------------------------------------------------------
+	-- Master seed for the seed generator, always 32 bits
+	-- FIXME currently set to 64 bits for experimentation
+	-- constant MASTER_SEED : unsigned(63 downto 0) := b"1101100111111001100100110001110011110010001000100010000010000100";
+
 	-- Seed for the random number generator
 	-- Number will just be truncated when n_bits is smaller
-	constant SEED : unsigned(n_bits * 2 - 1 downto 0) := to_unsigned(923456847, n_bits * 2);
+	-- FIXME deprecated
+--	constant SEED : unsigned(63 downto 0) := x"0000000000000000";
+
+	-- We don't need 20 seeds but just in case
+	constant NUM_SEEDS : positive := 20;
+	type seed_array_t is array(natural range 0 to NUM_SEEDS - 1) of unsigned(63 downto 0);
+	-- Indices 0 to 15 are reserved for rng_bank
+	-- Index 16 is reserved for gen_q
+	-- Index 17 is reserved for gen_b
+	constant SEEDS : seed_array_t := (
+		-- Reserved for rng_bank
+		x"93716937efeba65e",
+		x"08efa0dd8e94d2bf",
+		x"5d1a59e195ea7040",
+		x"5eee7a5e2e09b8f8",
+		x"fc02afd93f7a2f27",
+		x"10bd85ba8655757b",
+		x"860b9fd23e435a05",
+		x"cefb65e866be0134",
+		x"b17daf7b14789b7b",
+		x"35783c0925e3311c",
+		x"4a59c752b5d47f6f",
+		x"ef55da3d82ee505e",
+		x"4a76ce137a4cd553",
+		x"3edffcdc258255c0",
+		x"2bb40c42af7d1474",
+		x"a6f80b881de37a1c",
+		-- Reserved for gen_q
+		x"79600dfbd716292a",
+		-- Reserved for gen_b
+		x"7990e60be863c92c",
+		-- Reserved for encryptor
+		x"2ca662617cf9e4bc",
+		-- Unreserved
+		x"abf14d44f40fe0f7"
+	);
+
+
 
 	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
 
@@ -49,7 +93,7 @@ package data_types is
 	type array_t is array(natural range <>) of unsigned(n_bits - 1 downto 0);
 
 	-- myVector is a matrix
-	type myVector is array(natural range <>) of array_mul_t(0 to a_width - 1);
+	type myVector is array(natural range <>) of array_t(0 to a_width - 1);
 
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
 	-- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
@@ -65,7 +109,7 @@ package body data_types is
 	function a_width return natural is
 	begin
 		case CONFIG is
---		when 1 => return 8 -- for encryption testing
+		-- when 1 => return 8; -- for encryption testing
 		when 1 => return 4;
 		when 2 => return 8;
 		when 3 => return 16;
@@ -76,7 +120,7 @@ package body data_types is
 	function a_height return natural is
 	begin
 		case CONFIG is
---		when 1 => return 8; -- for encryption testing
+		-- when 1 => return 8; -- for encryption testing
 		when 1 => return 256;
 		when 2 => return 8192;
 		when 3 => return 32768;

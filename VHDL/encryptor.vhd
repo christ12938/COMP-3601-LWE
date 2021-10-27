@@ -49,10 +49,8 @@ end encryptor;
 architecture Behavioral of encryptor is
     component uniform_rng is
         Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
-            seed  : in STD_LOGIC_VECTOR (n_bits * 2 - 1 downto 0);  -- initial LFSR state
+            seed  : in STD_LOGIC_VECTOR (63 downto 0);  -- initial LFSR state
             clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
-            -- Make sure the width has the - 1 already otherwise Vivado gives you a weird error!
-            -- e.g. width => n_bits - 1, not width = n_bits
             random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
     end component;
 
@@ -77,7 +75,7 @@ begin
 
 random_index_generator : uniform_rng port map(
     cap => std_logic_vector(TO_UNSIGNED(a_height-1,n_bits)),
-    seed => std_logic_vector(SEED),
+    seed => std_logic_vector(SEEDS(19)),
     clk => clk,
     reset => reset,
     start_signal => start,

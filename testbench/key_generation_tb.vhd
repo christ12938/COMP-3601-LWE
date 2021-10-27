@@ -220,7 +220,7 @@ begin
 			addra => std_logic_vector(a_bram_address),
 			clka => clock,
 			dina => std_logic_vector(a_bram_data_in),
-			unsigned(douta) => a_bram_data_out,
+			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
 			rsta => reset
 		);
@@ -231,7 +231,7 @@ begin
 			addra => std_logic_vector(a_bram_address),
 			clka => clock,
 			dina => std_logic_vector(a_bram_data_in),
-			unsigned(douta) => a_bram_data_out,
+			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
 			rsta => reset
 		);
@@ -242,7 +242,7 @@ begin
 			addra => std_logic_vector(a_bram_address),
 			clka => clock,
 			dina => std_logic_vector(a_bram_data_in),
-			unsigned(douta) => a_bram_data_out,
+			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
 			rsta => reset
 		);
