@@ -146,6 +146,7 @@ architecture behavioural of lwe is
 			clk : in std_logic;
 			start : std_logic;
 			reset : std_logic;
+			rng_reset : std_logic;
 			data_a : in array_t(0 to a_width - 1);
 			data_b : in unsigned(n_bits - 1 downto 0);
 			q : in unsigned(n_bits - 1 downto 0);
@@ -255,7 +256,7 @@ begin
 			end if;
 
 		when S_ENCRYPT_IDLE =>
-			bram_address_control <= KEY_GENERATION_CONTROL;
+			-- bram_address_control <= KEY_GENERATION_CONTROL;
 			if start = '1' then
 				start_encryption <= '1';
 				next_state <= S_ENCRYPT_WORK;
@@ -266,8 +267,8 @@ begin
 		when S_ENCRYPT_WORK =>
 			start_encryption <= '1';
 
-			encrypt_a_bram_data <= a_bram_data_in_array;
-			encrypt_b_bram_data <= b_bram_data_in;
+			encrypt_a_bram_data <= a_bram_data_out_array;
+			encrypt_b_bram_data <= b_bram_data_out;
 
 			if encryption_done = '1' then
 				encryption_synchronous_reset <= '1';
@@ -325,6 +326,7 @@ begin
 		clk => clock_a,
 		start => start_encryption,
 		reset => reset_encryption,
+		rng_reset => reset,
 		data_a => encrypt_a_bram_data,
 		data_b => encrypt_b_bram_data,
 		q => q_reg_out,

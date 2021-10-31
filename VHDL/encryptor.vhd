@@ -26,6 +26,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use work.data_types.all;
 use IEEE.NUMERIC_STD.ALL;
+use std.textio.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -36,6 +37,7 @@ entity encryptor is
     Port ( clk : in STD_LOGIC;
            start : in STD_LOGIC;
            reset : in STD_LOGIC;
+           rng_reset : in std_logic;
            data_a : in array_t(0 to a_width-1);
            data_b : in unsigned(n_bits - 1 downto 0);
            q : in  unsigned(n_bits - 1 downto 0);
@@ -71,21 +73,27 @@ architecture Behavioral of encryptor is
     signal index : std_logic_vector(a_bram_address_width - 1 downto 0);
     signal got_all_data : std_logic;
     signal rng_out : std_logic_vector(n_bits - 1 downto 0);
+
+    signal DEBUG_COUNT : integer;
+    signal DEBUG_SAMPLE_SIZE : natural;
+    signal index_temp : unsigned(a_bram_address_width - 1 downto 0);
 begin
+    DEBUG_SAMPLE_SIZE <= sample_size - 1;
 
 random_index_generator : uniform_rng port map(
     cap => std_logic_vector(TO_UNSIGNED(a_height-1,n_bits)),
     seed => std_logic_vector(SEEDS(19)),
     clk => clk,
-    reset => reset,
+    reset => rng_reset,
     start_signal => start,
     random_number => rng_out
 );
 index <= std_logic_vector(resize(unsigned(rng_out), index'length));
 
 process(clk,reset)
-variable count : integer := 0;
+    variable count : integer := 0;
 begin
+    DEBUG_COUNT <= count;
     if reset = '1' then
         count := 0;
         got_all_data <= '0';
@@ -94,11 +102,64 @@ begin
         if count = sample_size - 1 then
             got_all_data <= '1';
         else
+        	index_temp <= unsigned(index);
             index_a <= unsigned(index);
             index_b <= unsigned(index);
             count := count + 1;
         end if;
     end if;
+end process;
+
+process
+	-- This must be run with lwe_tb
+	-- You MUST delete the text files before you run because it uses APPEND!
+	constant DO_PRINT : boolean := true;	-- Enable the printing
+	constant FILE_NAME : string := "encryptor_debug";	-- Base file name
+	constant MAX_FILES : integer := 10;	-- Number of matricies to print
+
+	file file_pointer : text;
+
+	variable file_number : integer := 0;
+	variable line_buffer : line;
+	variable number : integer;
+	variable temp : unsigned(n_bits - 1 downto 0);
+	variable working : boolean := false;
+	variable encryption_stage : boolean := false;
+begin
+	if DO_PRINT then
+		wait until rising_edge(clk);
+		
+		if file_number >= MAX_FILES then
+			report "Max files reached";
+			wait;	-- Don't write any more files
+		end if;
+
+		if start = '1' then
+			encryption_stage := true;
+		end if;
+		
+		if encryption_stage then
+			if got_all_data = '0' and start = '1' then
+				working := true;
+			end if;
+	
+			if working then
+				if got_all_data = '1' then
+					working := false;
+					file_number := file_number + 1;
+					
+				else
+					file_open(file_pointer, FILE_NAME & integer'image(file_number) & ".txt", append_mode);
+					write(line_buffer, integer'image(to_integer(unsigned(index_temp))) & " ");	-- Writes generated index
+					for i in 0 to a_width - 1 loop
+						write(line_buffer, integer'image(to_integer(data_a(i))) & " ");
+					end loop;
+					writeline(file_pointer, line_buffer);
+					file_close(file_pointer);
+				end if;
+			end if;
+		end if;
+	end if;
 end process;
 
 encryption : encrypt_combinational port map(
@@ -113,5 +174,4 @@ encryption : encrypt_combinational port map(
     encryptedM => encrypted_m,
     done => done
 );
-
 end Behavioral;

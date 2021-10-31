@@ -63,7 +63,7 @@ begin
 		-- variable plaintext_in_bit : std_logic;
 		variable char_available : boolean := false;
 
-		-- Accuracy analysiis
+		-- Accuracy analysis
 		variable bits_processed : integer := 0;
 		variable correct_answer : std_logic := '0';
 		variable correct_bits : integer := 0;
