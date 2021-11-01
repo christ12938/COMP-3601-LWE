@@ -54,6 +54,26 @@ begin
 
 	-- end process;
 
+	-- --------------------------- Encryptor Printing -----------------------------
+	-- This process clears the encryption debug files at the start of simulation
+  process
+		constant CLEAR_FILES : boolean := true;
+
+		-- Make sure these match what's in encryptor
+		constant FILE_NAME : string := "encryptor_debug_bit_";
+		constant MAX_FILES : integer := 10;
+
+		file file_pointer : text;
+	begin
+		if CLEAR_FILES then
+			for i in 0 to MAX_FILES - 1 loop
+				file_open(file_pointer, FILE_NAME & integer'image(i) & ".txt", write_mode);
+				file_close(file_pointer);
+			end loop;
+		end if;
+		wait;
+	end process;
+
 	-- -------------------------------- Stimulus ----------------------------------
   process
 		variable file_line : line;
@@ -111,9 +131,7 @@ begin
 
 					report integer'image(bits_processed) & " bits processed, accuracy: " & real'image((real(correct_bits) / real(bits_processed)));
 
-
 					wait for 10 * CLOCK_PERIOD;
-
 
 				end loop;
 
@@ -129,20 +147,7 @@ begin
 		report "Process finished, stopping... (not a failure)" severity failure;
 		wait;
 	end process;
-	-- process
-	-- 	variable file_status : file_open_status;
-	-- 	variable file_line : line;
-	-- 	variable data : character;
-	-- begin
-	-- 	file_open(file_pointer, PLAINTEXT_IN_FILE_NAME);
-	-- 	while not endfile(file_pointer) loop
-	-- 		readline(file_pointer, file_line);
-	-- 		read(file_line, data);
-	-- 		report integer'image(data) severity note;
-	-- 	end loop;
-	-- 	file_close(file_pointer);
-	-- 	wait;
-	-- end process;
+
 
 	uut : lwe
 	port map (

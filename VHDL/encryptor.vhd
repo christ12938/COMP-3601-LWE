@@ -110,11 +110,12 @@ begin
     end if;
 end process;
 
+-- ------------------------ Matrix Printing for Debug --------------------------
 process
 	-- This must be run with lwe_tb
-	-- You MUST delete the text files before you run because it uses APPEND!
+	-- Enable CLEAR_FILES process in lwe_tb to automatically clear the files on simulation start
 	constant DO_PRINT : boolean := true;	-- Enable the printing
-	constant FILE_NAME : string := "encryptor_debug";	-- Base file name
+	constant FILE_NAME : string := "encryptor_debug_bit_";	-- Base file name
 	constant MAX_FILES : integer := 10;	-- Number of matricies to print
 
 	file file_pointer : text;
@@ -128,7 +129,7 @@ process
 begin
 	if DO_PRINT then
 		wait until rising_edge(clk);
-		
+
 		if file_number >= MAX_FILES then
 			report "Max files reached";
 			wait;	-- Don't write any more files
@@ -137,17 +138,17 @@ begin
 		if start = '1' then
 			encryption_stage := true;
 		end if;
-		
+
 		if encryption_stage then
 			if got_all_data = '0' and start = '1' then
 				working := true;
 			end if;
-	
+
 			if working then
 				if got_all_data = '1' then
 					working := false;
 					file_number := file_number + 1;
-					
+
 				else
 					file_open(file_pointer, FILE_NAME & integer'image(file_number) & ".txt", append_mode);
 					write(line_buffer, integer'image(to_integer(unsigned(index_temp))) & " ");	-- Writes generated index
