@@ -46,14 +46,6 @@ architecture behavioural of lwe_tb is
 begin
 	clock <= not clock after CLOCK_PERIOD / 2;
 
-	-- --------------------------------- DEBUG ------------------------------------
-	-- process
-	-- 	variable file_line : line;
-	-- 	variable number : integer;
-  -- begin
-
-	-- end process;
-
 	-- -------------------------------- Stimulus ----------------------------------
   process
 		variable file_line : line;
@@ -63,7 +55,7 @@ begin
 		-- variable plaintext_in_bit : std_logic;
 		variable char_available : boolean := false;
 
-		-- Accuracy analysiis
+		-- Accuracy analysis
 		variable bits_processed : integer := 0;
 		variable correct_answer : std_logic := '0';
 		variable correct_bits : integer := 0;
@@ -111,9 +103,7 @@ begin
 
 					report integer'image(bits_processed) & " bits processed, accuracy: " & real'image((real(correct_bits) / real(bits_processed)));
 
-
 					wait for 10 * CLOCK_PERIOD;
-
 
 				end loop;
 
@@ -129,20 +119,7 @@ begin
 		report "Process finished, stopping... (not a failure)" severity failure;
 		wait;
 	end process;
-	-- process
-	-- 	variable file_status : file_open_status;
-	-- 	variable file_line : line;
-	-- 	variable data : character;
-	-- begin
-	-- 	file_open(file_pointer, PLAINTEXT_IN_FILE_NAME);
-	-- 	while not endfile(file_pointer) loop
-	-- 		readline(file_pointer, file_line);
-	-- 		read(file_line, data);
-	-- 		report integer'image(data) severity note;
-	-- 	end loop;
-	-- 	file_close(file_pointer);
-	-- 	wait;
-	-- end process;
+
 
 	uut : lwe
 	port map (

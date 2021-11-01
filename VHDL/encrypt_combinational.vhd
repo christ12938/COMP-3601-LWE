@@ -65,7 +65,7 @@ architecture Behavioral of encrypt_combinational is
 
 begin
 
-rowAdder : process(A_row,B_element,reset)
+rowAdder : process(A_row, B_element, reset, start, start_mod)
     variable sum_a_temp : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
   begin
     if reset='1' then
@@ -73,7 +73,7 @@ rowAdder : process(A_row,B_element,reset)
         sample_sum_b <= TO_UNSIGNED(0,mul_bits);
 
         sum_a_temp := (others => TO_UNSIGNED(0,mul_bits));
-    elsif start = '1' then
+    elsif start = '1' and start_mod = '0' then
         for ii in 0 to a_width-1 loop
             sum_a_temp(ii) := A_row(ii) + sample_sum_a(ii);
         end loop;

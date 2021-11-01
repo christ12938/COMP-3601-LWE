@@ -85,7 +85,7 @@ package data_types is
 
 
 
-	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits), 2));
+	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits + 1), 2));
 
 	-- An array of mul_bits bit numbers, used in multiplier, because multiplier needs larger numbers
 	type array_mul_t is array(natural range <>) of unsigned(mul_bits - 1 downto 0);
@@ -120,8 +120,8 @@ package body data_types is
 	function a_height return natural is
 	begin
 		case CONFIG is
-		-- when 1 => return 8; -- for encryption testing
-		when 1 => return 256;
+		when 1 => return 8; -- for encryption testing
+		-- when 1 => return 256;
 		when 2 => return 8192;
 		when 3 => return 32768;
 		when others => return 32768;
