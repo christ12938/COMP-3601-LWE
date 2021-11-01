@@ -27,7 +27,7 @@ architecture behavioural of lwe_tb is
 		);
 	end component;
 
-	constant CLOCK_PERIOD : time := 1 ns;
+	constant CLOCK_PERIOD : time := 100 ns;
 	-- -------------------------------- Signals -----------------------------------
 	signal clock : std_logic := '0';
 	signal start : std_logic := '0';

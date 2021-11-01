@@ -77,6 +77,8 @@ architecture Behavioral of encryptor is
     signal DEBUG_COUNT : integer;
     signal DEBUG_SAMPLE_SIZE : natural;
     signal index_temp : unsigned(a_bram_address_width - 1 downto 0);
+		signal encrypted_message_temp : encryptedMsg;
+		signal done_temp : std_logic;
 begin
     DEBUG_SAMPLE_SIZE <= sample_size - 1;
 
@@ -103,9 +105,9 @@ begin
             got_all_data <= '1';
         else
         	index_temp <= unsigned(index);
-            index_a <= unsigned(index);
-            index_b <= unsigned(index);
-            count := count + 1;
+					index_a <= unsigned(index);
+					index_b <= unsigned(index);
+					count := count + 1;
         end if;
     end if;
 end process;
@@ -113,7 +115,7 @@ end process;
 -- ------------------------ Matrix Printing for Debug --------------------------
 process
 	-- This should be run with lwe_tb
-	constant DO_PRINT : boolean := true;	-- Enable the printing
+	constant DO_PRINT : boolean := false;	-- Enable the printing
 	constant FILE_NAME : string := "encryptor_debug_bit_";	-- Base file name
 	constant MAX_FILES : integer := 16;	-- Number of matricies to print
 
@@ -155,6 +157,22 @@ begin
 
 			if working then
 				if got_all_data = '1' then
+					wait until done_temp = '1';
+					file_open(file_pointer, FILE_NAME & integer'image(file_number) & ".txt", append_mode);
+
+					-- Writes u
+					for i in 0 to a_width - 1 loop
+						write(line_buffer, integer'image(to_integer(encrypted_message_temp.u(i))) & " ");
+					end loop;
+
+					-- Writes v
+					write(line_buffer, integer'image(to_integer(encrypted_message_temp.v)) & " ");
+
+					-- Writes m
+					write(line_buffer, integer'image(to_integer(unsigned'('0' & M))) & " ");
+					writeline(file_pointer, line_buffer);
+					file_close(file_pointer);
+
 					-- Stop writing and move on to the next file when got_all_data is asserted
 					working := false;
 					file_number := file_number + 1;
@@ -162,14 +180,19 @@ begin
 				else
 					file_open(file_pointer, FILE_NAME & integer'image(file_number) & ".txt", append_mode);
 					write(line_buffer, integer'image(to_integer(unsigned(index_temp))) & " ");	-- Writes generated index
+					-- Writes the A row
 					for i in 0 to a_width - 1 loop
 						write(line_buffer, integer'image(to_integer(data_a(i))) & " ");
 					end loop;
+					-- Writes the B element
+					write(line_buffer, integer'image(to_integer(data_b)) & " ");
 					writeline(file_pointer, line_buffer);
 					file_close(file_pointer);
 				end if;
 			end if;
 		end if;
+	else
+		wait;
 	end if;
 end process;
 
@@ -182,7 +205,9 @@ encryption : encrypt_combinational port map(
     B_element => data_b,
     q => q,
     M => M,
-    encryptedM => encrypted_m,
-    done => done
+    encryptedM => encrypted_message_temp,
+    done => done_temp
 );
+encrypted_m <= encrypted_message_temp;
+done <= done_temp;
 end Behavioral;

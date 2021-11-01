@@ -227,7 +227,7 @@ begin
 	end process;
 
 	-- State logic
-	process(current_state, clock_a, start, key_generation_done)
+	process(current_state, clock_a, start, key_generation_done, b_bram_data_out)
 	begin
 		next_state <= current_state;
 		start_key_generation <= '0';
