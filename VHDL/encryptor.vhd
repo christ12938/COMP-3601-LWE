@@ -112,11 +112,10 @@ end process;
 
 -- ------------------------ Matrix Printing for Debug --------------------------
 process
-	-- This must be run with lwe_tb
-	-- Enable CLEAR_FILES process in lwe_tb to automatically clear the files on simulation start
+	-- This should be run with lwe_tb
 	constant DO_PRINT : boolean := true;	-- Enable the printing
 	constant FILE_NAME : string := "encryptor_debug_bit_";	-- Base file name
-	constant MAX_FILES : integer := 10;	-- Number of matricies to print
+	constant MAX_FILES : integer := 16;	-- Number of matricies to print
 
 	file file_pointer : text;
 
@@ -126,8 +125,18 @@ process
 	variable temp : unsigned(n_bits - 1 downto 0);
 	variable working : boolean := false;
 	variable encryption_stage : boolean := false;
+	variable clearing_complete : boolean := false;
 begin
 	if DO_PRINT then
+		if not clearing_complete then
+			-- Clears the debug files
+			for i in 0 to MAX_FILES - 1 loop
+				file_open(file_pointer, FILE_NAME & integer'image(i) & ".txt", write_mode);
+				file_close(file_pointer);
+			end loop;
+			clearing_complete := true;
+		end if;
+
 		wait until rising_edge(clk);
 
 		if file_number >= MAX_FILES then
@@ -146,6 +155,7 @@ begin
 
 			if working then
 				if got_all_data = '1' then
+					-- Stop writing and move on to the next file when got_all_data is asserted
 					working := false;
 					file_number := file_number + 1;
 

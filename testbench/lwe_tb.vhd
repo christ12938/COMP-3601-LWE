@@ -46,34 +46,6 @@ architecture behavioural of lwe_tb is
 begin
 	clock <= not clock after CLOCK_PERIOD / 2;
 
-	-- --------------------------------- DEBUG ------------------------------------
-	-- process
-	-- 	variable file_line : line;
-	-- 	variable number : integer;
-  -- begin
-
-	-- end process;
-
-	-- --------------------------- Encryptor Printing -----------------------------
-	-- This process clears the encryption debug files at the start of simulation
-  process
-		constant CLEAR_FILES : boolean := true;
-
-		-- Make sure these match what's in encryptor
-		constant FILE_NAME : string := "encryptor_debug_bit_";
-		constant MAX_FILES : integer := 10;
-
-		file file_pointer : text;
-	begin
-		if CLEAR_FILES then
-			for i in 0 to MAX_FILES - 1 loop
-				file_open(file_pointer, FILE_NAME & integer'image(i) & ".txt", write_mode);
-				file_close(file_pointer);
-			end loop;
-		end if;
-		wait;
-	end process;
-
 	-- -------------------------------- Stimulus ----------------------------------
   process
 		variable file_line : line;
