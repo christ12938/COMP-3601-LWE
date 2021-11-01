@@ -23,7 +23,7 @@ function [A, B] = lweGeneratePublicKey(s, q, keyHeight)
        B(i) = mod(new_element,q); 
     end
 %     disp("-------------------------------------");
-%     disp(mod(A * s, q)-B);
+    disp(mod(A * s, q)-B);
 
 end
 
