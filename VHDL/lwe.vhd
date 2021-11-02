@@ -171,6 +171,11 @@ architecture behavioural of lwe is
 	-- ----------------------------------------------------------------------------
 	--                                  Signals
 	-- ----------------------------------------------------------------------------
+
+	signal clock_a_n : std_logic := '0';
+	signal clock_b_n : std_logic := '0';
+	signal clock_c_n : std_logic := '0';
+
 	signal start_key_generation, start_encryption, key_generation_done, encryption_done : std_logic := '0';
 	signal reset_encryption : std_logic := '0';
 
@@ -216,6 +221,23 @@ architecture behavioural of lwe is
 	signal current_state, next_state : fsm_state := S_KEY_GEN_IDLE;
 
 begin
+
+	clock_a_n <= not clock_a;
+	clock_b_n <= not clock_b;
+	clock_c_n <= not clock_c;
+
+	-- Only pass bram data into encrypt on b_bram_data_out sensitivity
+	-- process(b_bram_data_out) begin
+	-- 	encrypt_a_bram_data <= (others => (others => '0'));
+	-- 	encrypt_b_bram_data <= (others => '0');
+
+	-- 	if current_state = S_ENCRYPT_WORK then
+	-- 		encrypt_a_bram_data <= a_bram_data_out_array;
+	-- 		encrypt_b_bram_data <= b_bram_data_out;
+	-- 	end if;
+	-- end process;
+
+
 	-- ------------------------------- Master FSM ---------------------------------
 	-- State transition
 	process(clock_a, reset) begin
@@ -391,7 +413,7 @@ begin
 		a_bram : a_bram_config_1
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -402,7 +424,7 @@ begin
 		a_bram : a_bram_config_2
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -413,7 +435,7 @@ begin
 		a_bram : a_bram_config_3
 		port map (
 			addra => std_logic_vector(a_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(a_bram_data_in),
 			douta => a_bram_data_out,
 			wea(0) => a_bram_write_enable,
@@ -426,7 +448,7 @@ begin
 		a_bram : b_bram_config_1
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -437,7 +459,7 @@ begin
 		a_bram : b_bram_config_2
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,
@@ -448,7 +470,7 @@ begin
 		a_bram : b_bram_config_3
 		port map (
 			addra => std_logic_vector(b_bram_address),
-			clka => clock_a,
+			clka => clock_a_n,
 			dina => std_logic_vector(b_bram_data_in),
 			unsigned(douta) => b_bram_data_out,
 			wea(0) => b_bram_write_enable,

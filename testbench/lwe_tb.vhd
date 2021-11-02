@@ -73,7 +73,7 @@ begin
 
 		wait until key_gen_done = '1';
 		report "TB: Key generation finished";
-		wait for CLOCK_PERIOD;
+		wait for 10 * CLOCK_PERIOD;
 
 		file_open(file_pointer, PLAINTEXT_IN_FILE_NAME);
 		-- Loop over each line
