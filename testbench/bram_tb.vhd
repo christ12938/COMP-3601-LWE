@@ -96,21 +96,22 @@ begin
 
 		wait for 10 * CLOCK_PERIOD;
 		
---		file_open(file_pointer, FILE_NAME, write_mode);
---		for i in 0 to a_height - 1 loop
---			a_bram_address <= to_unsigned(i, a_bram_address'length);
+		file_open(file_pointer, FILE_NAME, write_mode);
+		for i in 0 to a_height - 1 loop
+			a_bram_address <= to_unsigned(i, a_bram_address'length);
+			wait until rising_edge(clock);
+			write(line_buffer, integer'image(i) & ": ");
+			for j in 0 to a_width - 1 loop
+				reading <= '1';
+				write(line_buffer, integer'image(to_integer(a_bram_data_out_array(j))) & " ");
+			end loop;
+			writeline(file_pointer, line_buffer);
 --			wait until rising_edge(clock);
---			for j in 0 to a_width - 1 loop
---				reading <= '1';
---				write(line_buffer, integer'image(to_integer(a_bram_data_out_array(j))) & " ");
---			end loop;
---			writeline(file_pointer, line_buffer);
-----			wait until rising_edge(clock);
---		end loop;
---		file_close(file_pointer);
---		reading <= '0';
+		end loop;
+		file_close(file_pointer);
+		reading <= '0';
 		
---		wait for 10 * CLOCK_PERIOD;
+		wait for 10 * CLOCK_PERIOD;
 		
 		for i in 0 to 100 loop
 			if flag then
