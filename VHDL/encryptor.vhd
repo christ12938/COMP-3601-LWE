@@ -34,82 +34,82 @@ use std.textio.all;
 --use UNISIM.VComponents.all;
 
 entity encryptor is
-    Port ( clk : in STD_LOGIC;
-           start : in STD_LOGIC;
-           reset : in STD_LOGIC;
-           rng_reset : in std_logic;
-           data_a : in array_t(0 to a_width-1);
-           data_b : in unsigned(n_bits - 1 downto 0);
-           q : in  unsigned(n_bits - 1 downto 0);
-           M : in STD_LOGIC;
-           index_a : out unsigned(a_bram_address_width - 1 downto 0);
-           index_b : out unsigned(b_bram_address_width - 1 downto 0);
-           encrypted_m : out encryptedMsg;
-           done : out STD_LOGIC);
+	Port ( clk : in STD_LOGIC;
+		   start : in STD_LOGIC;
+		   reset : in STD_LOGIC;
+		   rng_reset : in std_logic;
+		   data_a : in array_t(0 to a_width-1);
+		   data_b : in unsigned(n_bits - 1 downto 0);
+		   q : in  unsigned(n_bits - 1 downto 0);
+		   M : in STD_LOGIC;
+		   index_a : out unsigned(a_bram_address_width - 1 downto 0);
+		   index_b : out unsigned(b_bram_address_width - 1 downto 0);
+		   encrypted_m : out encryptedMsg;
+		   done : out STD_LOGIC);
 end encryptor;
 
 architecture Behavioral of encryptor is
-    component uniform_rng is
-        Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
-            seed  : in STD_LOGIC_VECTOR (63 downto 0);  -- initial LFSR state
-            clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
-            random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
-    end component;
+	component uniform_rng is
+		Port ( cap : in STD_LOGIC_vector (n_bits - 1 downto 0);
+			seed  : in STD_LOGIC_VECTOR (63 downto 0);  -- initial LFSR state
+			clk,reset,start_signal   :in std_logic;  -- start signal will be set from log
+			random_number : out STD_LOGIC_vector(n_bits - 1 downto 0));
+	end component;
 
-    component encrypt_combinational is
-        Port ( clk : in STD_LOGIC;
-               start : in std_logic;
-               start_mod : in STD_LOGIC;
-               reset : in STD_LOGIC;
-               A_row : in array_t(0 to a_width-1);
-               B_element : in unsigned(n_bits - 1 downto 0);
-               q : in unsigned(n_bits - 1 downto 0);
-               M : in STD_LOGIC;
-               encryptedM : out encryptedMsg;
-               done : out STD_LOGIC
-               );
-    end component;
+	component encrypt_combinational is
+		Port ( clk : in STD_LOGIC;
+			   start : in std_logic;
+			   start_mod : in STD_LOGIC;
+			   reset : in STD_LOGIC;
+			   A_row : in array_t(0 to a_width-1);
+			   B_element : in unsigned(n_bits - 1 downto 0);
+			   q : in unsigned(n_bits - 1 downto 0);
+			   M : in STD_LOGIC;
+			   encryptedM : out encryptedMsg;
+			   done : out STD_LOGIC
+			   );
+	end component;
 
-    signal index : std_logic_vector(a_bram_address_width - 1 downto 0);
-    signal got_all_data : std_logic;
-    signal rng_out : std_logic_vector(n_bits - 1 downto 0);
+	signal index : std_logic_vector(a_bram_address_width - 1 downto 0);
+	signal got_all_data : std_logic;
+	signal rng_out : std_logic_vector(n_bits - 1 downto 0);
 
-    signal DEBUG_COUNT : integer;
-    signal DEBUG_SAMPLE_SIZE : natural;
-    signal index_temp : unsigned(a_bram_address_width - 1 downto 0);
-		signal encrypted_message_temp : encryptedMsg;
-		signal done_temp : std_logic;
+	signal DEBUG_COUNT : integer;
+	signal DEBUG_SAMPLE_SIZE : natural;
+	signal index_temp : unsigned(a_bram_address_width - 1 downto 0);
+	signal encrypted_message_temp : encryptedMsg;
+	signal done_temp : std_logic;
 begin
-    DEBUG_SAMPLE_SIZE <= sample_size - 1;
+	DEBUG_SAMPLE_SIZE <= sample_size - 1;
 
 random_index_generator : uniform_rng port map(
-    cap => std_logic_vector(TO_UNSIGNED(a_height-1,n_bits)),
-    seed => std_logic_vector(SEEDS(19)),
-    clk => clk,
-    reset => rng_reset,
-    start_signal => start,
-    random_number => rng_out
+	cap => std_logic_vector(TO_UNSIGNED(a_height-1,n_bits)),
+	seed => std_logic_vector(SEEDS(19)),
+	clk => clk,
+	reset => rng_reset,
+	start_signal => start,
+	random_number => rng_out
 );
 index <= std_logic_vector(resize(unsigned(rng_out), index'length));
 
 process(clk,reset)
-    variable count : integer := 0;
+	variable count : integer := 0;
 begin
-    DEBUG_COUNT <= count;
-    if reset = '1' then
-        count := 0;
-        got_all_data <= '0';
---        index <= (others => '0');
-    elsif start = '1' and rising_edge(clk) then
-        if count = sample_size - 1 then
-            got_all_data <= '1';
-        else
-        	index_temp <= unsigned(index);
-					index_a <= unsigned(index);
-					index_b <= unsigned(index);
-					count := count + 1;
-        end if;
-    end if;
+	DEBUG_COUNT <= count;
+	if reset = '1' then
+		count := 0;
+		got_all_data <= '0';
+		-- index <= (others => '0');
+	elsif start = '1' and rising_edge(clk) then
+		if count = sample_size - 1 then
+			got_all_data <= '1';
+		else
+			index_temp <= unsigned(index);
+			index_a <= unsigned(index);
+			index_b <= unsigned(index);
+			count := count + 1;
+		end if;
+	end if;
 end process;
 
 -- ------------------------ Matrix Printing for Debug --------------------------
@@ -197,16 +197,16 @@ begin
 end process;
 
 encryption : encrypt_combinational port map(
-    clk => clk,
-    start => start,
-    start_mod => got_all_data,
-    reset => reset,
-    A_row => data_a,
-    B_element => data_b,
-    q => q,
-    M => M,
-    encryptedM => encrypted_message_temp,
-    done => done_temp
+	clk => clk,
+	start => start,
+	start_mod => got_all_data,
+	reset => reset,
+	A_row => data_a,
+	B_element => data_b,
+	q => q,
+	M => M,
+	encryptedM => encrypted_message_temp,
+	done => done_temp
 );
 encrypted_m <= encrypted_message_temp;
 done <= done_temp;

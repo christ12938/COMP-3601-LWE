@@ -49,11 +49,11 @@ end encrypt_combinational;
 architecture Behavioral of encrypt_combinational is
     component modulus_combinational is
        generic ( dividend_width : natural := mul_bits;
-	             divisor_width : natural := n_bits);
-	   Port(
-			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
-			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
-			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
+                 divisor_width : natural := n_bits);
+       Port(
+            Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
+            Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
+            Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
 
   signal sample_sum_a : array_mul_t(0 to a_width-1);

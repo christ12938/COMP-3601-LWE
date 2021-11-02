@@ -145,7 +145,6 @@ begin
 
 	-- Generate a_width generators, these generators are used for A and s
 	rng_bank : for i in 0 to a_width - 1 generate
-		-- Vivado complains if I don't do this with a separate signal
 		rng : uniform_rng
 		port map (
 			-- seed => std_logic_vector(seed_gen_out),

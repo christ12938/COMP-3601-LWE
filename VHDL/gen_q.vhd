@@ -57,7 +57,12 @@ architecture behavioural of gen_q is
 	signal address : unsigned(primes_bram_address_width - 1 downto 0) := to_unsigned(0, primes_bram_address_width);
 	signal random_number : unsigned(n_bits - 1 downto 0);
 	signal start_rng : std_logic := '1';
+	signal clock_n : std_logic := '0';
+
 begin
+
+	clock_n <= not clock;
+
 	-- Random number generator
 	rng : uniform_rng
 	port map (
@@ -76,7 +81,7 @@ begin
 	primes_bram_config_1 : if (CONFIG = 1) generate
 		primes_bram_config_1 : primes_config_1
 		port map (
-			clka => clock,
+			clka => clock_n,
 			addra => std_logic_vector(address),
 			unsigned(douta) => random_prime
 		);
@@ -84,7 +89,7 @@ begin
 	primes_bram_config_2 : if (CONFIG = 2) generate
 		primes_bram_config_2 : primes_config_2
 		port map (
-			clka => clock,
+			clka => clock_n,
 			addra => std_logic_vector(address),
 			unsigned(douta) => random_prime
 		);
@@ -92,9 +97,10 @@ begin
 	primes_bram_config_3 : if (CONFIG = 3) generate
 		primes_bram_config_3 : primes_config_3
 		port map (
-			clka => clock,
+			clka => clock_n,
 			addra => std_logic_vector(address),
 			unsigned(douta) => random_prime
 		);
 	end generate;
+
 end;
