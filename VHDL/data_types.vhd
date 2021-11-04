@@ -16,14 +16,14 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 3;
+	constant CONFIG : natural := 2;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
 	function a_height return natural;	-- Height of matrix A
-	
+
 	function a_height_bits return natural;	-- Number of bits of Height of matrix A
-	
+
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
@@ -36,6 +36,7 @@ package data_types is
 	function a_bram_address_width return natural;	-- Width of the matrix A block RAM's address
 	function primes_bram_address_width return natural;	-- Width of the primes block ROM's address
 	function num_primes return natural;	-- Number of total primes for each configuration
+	function encryption_sum_bits return natural;	-- The modulus's divident width inside the encryption module
 	-- Block RAM data width for the primes is n_bits
 	constant b_bram_data_width : natural := a_bram_data_width;
 	constant b_bram_address_width : natural := a_bram_address_width;
@@ -58,6 +59,7 @@ package data_types is
 	-- Indices 0 to 15 are reserved for rng_bank
 	-- Index 16 is reserved for gen_q
 	-- Index 17 is reserved for gen_b
+	-- Index 18 is reserved for encryptor
 	constant SEEDS : seed_array_t := (
 		-- Reserved for rng_bank
 		x"93716937efeba65e",
@@ -132,7 +134,7 @@ package body data_types is
 
 		end case;
 	end;
-    
+
     function a_height_bits return natural is
 	begin
 		case CONFIG is
@@ -142,7 +144,7 @@ package body data_types is
 		when others => return 15;
 		end case;
 	end;
-	
+
 	function min_q return natural is
 	begin
 		case CONFIG is
@@ -220,6 +222,16 @@ package body data_types is
 		when 2 => return 719;
 		when 3 => return 4642;
 		when others => return 4642;
+		end case;
+	end;
+
+	function encryption_sum_bits return natural is
+  begin
+		case CONFIG is
+		when 1 => return 14;
+		when 2 => return 25;
+		when 3 => return 30;
+		when others => return n_bits;
 		end case;
 	end;
 

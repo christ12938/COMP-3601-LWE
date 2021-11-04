@@ -83,7 +83,7 @@ begin
             result := (others => '0');
             done <= '0';
             sample := 0;
-        elsif start_signal = '1' and sample < 5 then
+        elsif rising_edge(clk) and start_signal = '1' and sample < 5 then
             result := result + random_number_signal;
             if (to_integer(unsigned(result)) > rn_range) then
                 result := result - rn_range;

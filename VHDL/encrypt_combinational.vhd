@@ -51,9 +51,9 @@ architecture Behavioral of encrypt_combinational is
        generic ( dividend_width : natural := mul_bits;
                  divisor_width : natural := n_bits);
        Port(
-            Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
-            Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
-            Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
+            Dividend                : IN		UNSIGNED(dividend_width - 1 DOWNTO 0);
+            Divisor		            : IN		UNSIGNED(divisor_width - 1 DOWNTO 0);
+            Modulo               : OUT       UNSIGNED(divisor_width - 1 DOWNTO 0));
     end component;
 
   signal sample_sum_a : array_mul_t(0 to a_width-1);
@@ -62,6 +62,7 @@ architecture Behavioral of encrypt_combinational is
   signal dividends : array_mul_t(0 to 3);
   signal dividend_b : unsigned(mul_bits-1 downto 0);
   signal remainders : array_t(0 to 3);
+
 
 begin
 
@@ -82,7 +83,7 @@ rowAdder : process(A_row, B_element, reset, start, start_mod)
         sample_sum_b <= B_element + sample_sum_b;
     end if;
 
- end process;
+end process;
 
 modu0: modulus_combinational port map(
             Dividend => dividends(0),

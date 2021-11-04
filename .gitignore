@@ -1,6 +1,9 @@
 # ------------------------ Python Virtual Environment ------------------------ #
 .venv
 
+# ---------------------------------- VS Code --------------------------------- #
+.vscode
+
 # ----------------------------- Block RAM Folders ---------------------------- #
 # Vivado being Vivado means it likes dump a lot of files in the directory where the block RAMs are
 # Git being git means I can't wildcard everything inside VHDL/block_rams except VHDL/block_rams/**.xci
