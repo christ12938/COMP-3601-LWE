@@ -16,11 +16,14 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 2;
+	constant CONFIG : natural := 3;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
 	function a_height return natural;	-- Height of matrix A
+	
+	function a_height_bits return natural;	-- Number of bits of Height of matrix A
+	
 	constant b_height : natural := a_height;	-- Heighed of vector B
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
@@ -85,7 +88,8 @@ package data_types is
 
 
 
-	constant sample_size : natural := TO_INTEGER(shift_right(TO_UNSIGNED(a_height,n_bits + 1), 2));
+	constant sample_size : natural := a_height / 4;
+    type array_index is array(natural range 0 to sample_size - 1) of unsigned(a_height_bits - 1 downto 0);
 
 	-- An array of mul_bits bit numbers, used in multiplier, because multiplier needs larger numbers
 	type array_mul_t is array(natural range <>) of unsigned(mul_bits - 1 downto 0);
@@ -120,15 +124,25 @@ package body data_types is
 	function a_height return natural is
 	begin
 		case CONFIG is
-		when 1 => return 8; -- for encryption testing
-		-- when 1 => return 256;
+		-- when 1 => return 8; -- for encryption testing
+		when 1 => return 256;
 		when 2 => return 8192;
 		when 3 => return 32768;
 		when others => return 32768;
 
 		end case;
 	end;
-
+    
+    function a_height_bits return natural is
+	begin
+		case CONFIG is
+		when 1 => return 8;
+		when 2 => return 13;
+		when 3 => return 15;
+		when others => return 15;
+		end case;
+	end;
+	
 	function min_q return natural is
 	begin
 		case CONFIG is
