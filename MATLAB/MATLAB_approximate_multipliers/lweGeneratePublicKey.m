@@ -1,5 +1,10 @@
 function [A, B] = lweGeneratePublicKey(s, q, keyHeight)
-    % args:
+
+bitlen = ceil(log2(q));
+k = bitlen*2+1;
+[logdeltas,expdeltas] = calcDeltas(bitlen);
+
+% args:
     %     s = secret key
     %     q = random number range, should be prime
     %     keyHeight = the height of the key
@@ -12,17 +17,18 @@ function [A, B] = lweGeneratePublicKey(s, q, keyHeight)
     end
     B = zeros(keyHeight,1);
     A = randi([0, q], keyHeight, height(s));
-    %e = round(randn(keyHeight, 1));
+%     e = round(randn(keyHeight, 1));
     % e = 0;
 %     for i = 1:keyHeight
 %        [new_element] = rowMul(A(i,:),s);
 %        B(i) = mod(new_element+e(i,:),q); 
 %     end
     for i = 1:keyHeight
-       [new_element] = rowMul(A(i,:),s);
+       [new_element] = rowMul(A(i,:),s,logdeltas,expdeltas,k);
        B(i) = mod(new_element,q); 
     end
-    %B = mod(A * s + e, q);
+%     disp("-------------------------------------");
+    disp(mod(A * s, q)-B);
 
 end
 

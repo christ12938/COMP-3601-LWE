@@ -61,7 +61,7 @@ begin
 	begin
 		if reset = '1' then
 			internal_state <= seed;
-		elsif start_signal = '1' and (rising_edge(clk) or falling_edge(clk)) then
+		elsif start_signal = '1' and rising_edge(clk) then
 			internal_state <= internal_state(62 downto 0) & feedback;
 		end if;
 	end process;

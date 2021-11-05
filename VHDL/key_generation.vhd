@@ -97,7 +97,8 @@ architecture behavioural of key_generation is
 		s_gen_b_work,
 		s_finished
 	);
-	constant S_GEN_B_WAIT_DURATION : positive := 2;
+
+	constant BLOCK_RAM_DELAY : positive := 1;
 
 	signal current_state : key_gen_state := s_idle;
 	signal next_state : key_gen_state := s_idle;
@@ -145,7 +146,6 @@ begin
 
 	-- Generate a_width generators, these generators are used for A and s
 	rng_bank : for i in 0 to a_width - 1 generate
-		-- Vivado complains if I don't do this with a separate signal
 		rng : uniform_rng
 		port map (
 			-- seed => std_logic_vector(seed_gen_out),
@@ -267,32 +267,6 @@ begin
 				next_state <= s_gen_q;
 			end if;
 
-		-- when s_gen_seeds =>
-		-- 	-- Seed generation
-		-- 	-- Use counter A
-		-- 	counter_a_enable <= '1';
-
-		-- 	if counter_a = NUM_GENERATORS - 1 then
-		-- 		-- Counter done, everything has been seeded
-		-- 		counter_a_reset_synchronous <= '1';
-		-- 		next_state <= s_gen_q;
-		-- 	end if;
-
-		-- 	if counter_a = NUM_GENERATORS - 1 - 1 then
-		-- 		-- gen_q's turn for seed
-		-- 		gen_q_seed_valid <= '1';
-		-- 	end if;
-
-		-- 	if counter_a = NUM_GENERATORS - 1 - 2 then
-		-- 		-- gen_b's turn for seed
-		-- 		gen_b_seed_valid <= '1';
-		-- 	end if;
-
-		-- 	if counter_a < a_width then
-		-- 		-- rng_bank's turn for seed
-		-- 		rng_bank_seed_valid(counter_a) <= '1';
-		-- 	end if;
-
 		when s_gen_q =>
 			-- The random number generators are connected to q_out and are always running
 			-- We just take the random number at this clock cycle
@@ -323,10 +297,10 @@ begin
 			end if;
 
 		when s_gen_b_wait =>
-			-- 2 clock cycle to wait for the block RAM A to have the right output ready
+			-- 1 clock cycle to wait for the block RAM A to have the right output ready
 			-- Just use counter c
 			counter_c_enable <= '1';
-			if counter_c = S_GEN_B_WAIT_DURATION - 1 then
+			if counter_c = BLOCK_RAM_DELAY - 1 then
 				-- If it's been 2 clock cycles, move on
 				counter_c_reset_synchronous <= '1';
 				next_state <= s_gen_b_work;
@@ -352,31 +326,10 @@ begin
 				b_valid <= '1';
 			end if;
 
-			if counter_c = GEN_B_CLOCKS - 1 - 1 then
-				-- Pre-emptively increment the A block RAM address 1 clock before gen_b is expected to finish (because the block RAM takes 2 clocks to update)
+			if counter_c = GEN_B_CLOCKS - 1 - BLOCK_RAM_DELAY then
+				-- Pre-emptively increment the A block RAM address 1 clock before gen_b is expected to finish (because the block RAM takes 1 clock to update)
 				counter_a_enable <= '1';
 			end if;
-
-			-- if gen_b_done = '1' then
-			-- 	-- gen_b is finished
-			-- 	-- Acknowledge by de-asserting gen_b_start
-			-- 	gen_b_start <= '0';
-			-- 	-- Tell external components gen_b is valid
-			-- 	b_valid <= '1';
-
-			-- 	if counter = b_height - 1 then
-			-- 		-- Counter is done, meaning we've written all of vector B
-			-- 		next_state <= s_finished;
-			-- 		counter_reset_synchronous <= '1';
-			-- 	else
-			-- 		-- Counter isn't done, so continue with the next element of vector B
-			-- 		-- Increment the counter
-			-- 		counter_enable <= '1';
-			-- 		-- Go wait a clock cycle for the block RAM to work
-			-- 		next_state <= s_gen_b_wait;
-			-- 	end if;
-			-- end if;
-				-- gen_b is still working
 
 		when s_finished =>
 			done <= '1';

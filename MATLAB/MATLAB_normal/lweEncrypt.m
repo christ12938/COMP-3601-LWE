@@ -25,5 +25,12 @@ function [u, v] = lweEncrypt(A, B, M, q, samples)
         v = v + B(randomRow, :);
     end
     u = mod(u, q);
-    v = mod(v - floor(q / 2) * M, q);
+    % fprintf("%d\n", v - floor(q / 2));
+    %v = mod(v - floor(q / 2) * M, q);
+    if M == 1
+        v = mod(v - floor(q / 2), q);
+    else
+        v = mod(v, q);
+    end
+    
 end

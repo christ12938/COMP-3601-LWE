@@ -1,8 +1,8 @@
-secret = [50;6;70;8;9];
-q = 8191;
-keyHeight = 200;
-samples = 50;
-tests = 1e5;
+secret = [4701;3470;4496;664;6247;8187;4998;3116];
+q = 3347;
+keyHeight = 8192;
+samples = keyHeight / 4;
+tests = 1e4;
 
 [A, B] = lweGeneratePublicKey(secret, q, keyHeight);
 

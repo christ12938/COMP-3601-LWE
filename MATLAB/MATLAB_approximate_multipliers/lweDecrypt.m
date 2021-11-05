@@ -8,16 +8,16 @@ function M = lweDecrypt(u, v, s, q)
     %     M = plaintext bit
     
     decoded = mod(v - u * s, q);
-    % disp(decoded)
-    % disp(q/4)
-    %if (q / 4) <= decoded && decoded <= ((3 * q) / 4)
-    %    M = 1;
-    %else
-    %    M = 0;
-    %end
-    if decoded <= (q/4) && decoded >=(-1*(q/4))
-        M = 0;
+%     disp(decoded)
+%     disp(q/4)
+    if (q / 4) <= decoded && decoded <= ((3 * q) / 4)
+       M = 1;
     else
-        M = 1;
+       M = 0;
     end
+%     if decoded <= (q/4) && decoded >=(-1*(q/4))
+%         M = 0;
+%     else
+%         M = 1;
+%     end
 end

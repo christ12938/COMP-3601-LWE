@@ -49,11 +49,11 @@ end encrypt_combinational;
 architecture Behavioral of encrypt_combinational is
     component modulus_combinational is
        generic ( dividend_width : natural := mul_bits;
-	             divisor_width : natural := n_bits);
-	   Port(
-			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
-			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
-			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
+                 divisor_width : natural := n_bits);
+       Port(
+            Dividend                : IN		UNSIGNED(dividend_width - 1 DOWNTO 0);
+            Divisor		            : IN		UNSIGNED(divisor_width - 1 DOWNTO 0);
+            Modulo               : OUT       UNSIGNED(divisor_width - 1 DOWNTO 0));
     end component;
 
   signal sample_sum_a : array_mul_t(0 to a_width-1);
@@ -63,9 +63,10 @@ architecture Behavioral of encrypt_combinational is
   signal dividend_b : unsigned(mul_bits-1 downto 0);
   signal remainders : array_t(0 to 3);
 
+
 begin
 
-rowAdder : process(A_row,B_element,reset)
+rowAdder : process(A_row, B_element, reset, start, start_mod)
     variable sum_a_temp : array_mul_t(0 to a_width-1) := (others => TO_UNSIGNED(0,mul_bits));
   begin
     if reset='1' then
@@ -73,7 +74,7 @@ rowAdder : process(A_row,B_element,reset)
         sample_sum_b <= TO_UNSIGNED(0,mul_bits);
 
         sum_a_temp := (others => TO_UNSIGNED(0,mul_bits));
-    elsif start = '1' then
+    elsif start = '1' and start_mod = '0' then
         for ii in 0 to a_width-1 loop
             sum_a_temp(ii) := A_row(ii) + sample_sum_a(ii);
         end loop;
@@ -82,7 +83,7 @@ rowAdder : process(A_row,B_element,reset)
         sample_sum_b <= B_element + sample_sum_b;
     end if;
 
- end process;
+end process;
 
 modu0: modulus_combinational port map(
             Dividend => dividends(0),

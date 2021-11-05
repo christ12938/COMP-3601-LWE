@@ -12,22 +12,22 @@ end decrypt;
 architecture Behavioral of decrypt is
 
     component row_mul_combinational is
-	   generic (
-		  mul_bits : natural := mul_bits
-		);
-	   Port ( A : in array_mul_t;
+       generic (
+          mul_bits : natural := mul_bits
+        );
+       Port ( A : in array_mul_t;
             S : in array_mul_t;
 --            reset, start : in std_logic;
             result : out unsigned);
     end component;
 
-    component modulus is
-       generic ( mul_bits : natural := mul_bits;
-	             n_bits : natural := n_bits);
-	   Port(	Start, Reset       : IN 		STD_LOGIC;
-			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
-			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
-			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
+    component modulus_combinational is
+       generic ( dividend_width : natural := mul_bits;
+                 divisor_width : natural := n_bits);
+       Port(
+            Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
+            Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
+            Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
 
     signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
@@ -36,10 +36,10 @@ architecture Behavioral of decrypt is
     signal condition : unsigned(n_bits - 1 DOWNTO 0);
     signal temp_u, temp_s : array_mul_t(0 to a_width - 1);
 begin
-	conversion : for i in 0 to a_width - 1 generate
-		temp_u(i) <= resize(U(i), mul_bits);
-		temp_s(i) <= resize(S(i), mul_bits);
-	end generate;
+    conversion : for i in 0 to a_width - 1 generate
+        temp_u(i) <= resize(U(i), mul_bits);
+        temp_s(i) <= resize(S(i), mul_bits);
+    end generate;
 
     row_mul: row_mul_combinational port map (
             A => temp_u,
@@ -48,18 +48,23 @@ begin
 --            start => '1',
             result => rowMul_result);
 
-    modu: modulus port map(
-            Start => '1',
-            Reset => '0',
+    modu: modulus_combinational port map (
+--            Start => '1',
+--            Reset => '0',
             Dividend => product_result,
             Divisor => Q,
             Modulo => dec);
 
-     product_result <= to_unsigned((to_integer(V) - to_integer(rowMul_result)), mul_bits);
-     condition <= "00" & Q (n_bits - 1 DOWNTO 2);
-     M <= '0' when dec < condition else
-          '1';
-
-    -- M <= '1' when ((q / 4) < dec and dec < (3 * q / 4)) else '0';
-
+    product_result <= to_unsigned((to_integer(V) - to_integer(rowMul_result)), mul_bits);
+    -- condition <= "00" & Q (n_bits - 1 DOWNTO 2);
+    -- condition <= Q / 4;
+    -- M <= '0' when dec < condition else
+        --  '1';
+	condition_generation_config_3 : if CONFIG = 3 generate
+    	M <= '1' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '0';
+    end generate;
+    -- If else generate is only supported in VHDL 2008 so I have to do this
+    condition_generation_config_others : if CONFIG = 2 or CONFIG = 1 generate
+    	M <= '0' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '1';
+	end generate;
 end Behavioral;
