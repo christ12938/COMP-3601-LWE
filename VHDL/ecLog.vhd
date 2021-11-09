@@ -29,9 +29,11 @@ USE WORK.DATA_TYPES.ALL;
 
 entity log_v1 is
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
-           delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
-           k       : in integer;                                    -- what is the range
-           res :   out UNSIGNED(n_bits - 1 downto 0));   -- how should we return the output ? what is the size of the output after trunctuation
+          delta:  in UNSIGNED(k_trunc - 1 downto 0);       -- what is the size
+           --k       : in integer;                                    -- what is the range
+           res :   out UNSIGNED(n_bits - 1 downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
+           frac_output:   out unsigned (mL - 1  downto 0)); -- replaced with ML
+
 end log_v1;
 
 
@@ -63,12 +65,13 @@ begin
                                        output => frac);
 process(input)
 variable lg: unsigned(n_bits-1 downto 0);
-var char : unsigned(n_bits downto 0);
+variable char : unsigned(n_bits downto 0);
 
 begin                              
     char:= TO_UNSIGNED(log,n_bits);        -- converting log to int 
     lg := char(n_bits-k-1 downto 0) & frac(k downto 0); -- concatenating char,frac
-    res <= lg + delta;
+    res <= lg + delta; --Need to get this here based on the frac 
+    frac_output <= frac;
 end process;
     
 
