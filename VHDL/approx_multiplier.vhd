@@ -24,8 +24,8 @@ entity approx_multiplier is
            start : in STD_LOGIC;
            input_a : in unsigned(mul_bits-1 downto 0) ;
            input_b : in unsigned(mul_bits -1 downto 0);
-           res   : out unsigned (2*mul_bits -1 downto 0));
---           done  : out std_logic);
+           res   : out unsigned (2*mul_bits -1 downto 0);
+           finished_operation  : out std_logic);
            
 end approx_multiplier;
 
@@ -84,7 +84,7 @@ type approx_mul_state is (
     signal approx_log_B:    unsigned (3+ k_trunc downto 0);  -- max integer size: 4 --> 4 + k_trunc (size of frac)
     
     signal ecExp_input : unsigned (3+ k_trunc downto 0);
-    signal done         : std_logic;    
+    signal done        : std_logic;
 
 begin
 
@@ -177,9 +177,10 @@ begin
         delta_addr_exp  <= ecExp_input_var(k_trunc -1 downto 0);
         -- delta_addr_exp <= delta_addr_A + delta_addr_B;
 
-    elsif done = '1' then 
+    elsif done = '1' then
         delta_exp <= (others => '0');  -- replace this with the value from block ram 
-
+        finished_operation <= '1';
+        
     end if;
 end process;
                                              
