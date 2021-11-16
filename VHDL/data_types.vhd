@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 2;
+	constant CONFIG : natural := 1;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A
@@ -241,7 +241,7 @@ package body data_types is
 	function mL return natural is
   begin
 		case CONFIG is
-		when 1 => return 6;
+		when 1 => return 7;
 		when 2 => return 12;
 		when 3 => return 18;
 		when others => return n_bits;
@@ -251,7 +251,7 @@ package body data_types is
 	function mE return natural is
   begin
 		case CONFIG is
-		when 1 => return 7;
+		when 1 => return 11;
 		when 2 => return 15;
 		when 3 => return 23;
 		when others => return n_bits;

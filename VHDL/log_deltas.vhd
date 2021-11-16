@@ -36,7 +36,7 @@ USE WORK.DATA_TYPES.ALL;
 --use UNISIM.VComponents.all;
 
 entity log_deltas is
-    Port (frac : in unsigned(6 downto 0);
+    Port (frac : in unsigned(mL - 1 downto 0);
           delta : out unsigned(k_trunc-1 downto 0));
 end log_deltas;
 
