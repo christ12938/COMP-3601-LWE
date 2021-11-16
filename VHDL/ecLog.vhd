@@ -27,17 +27,17 @@ use IEEE.Std_logic_1164.all;
 use IEEE.Numeric_Std.all;
 USE WORK.DATA_TYPES.ALL;
 
-entity log_v1 is
+entity ecLog is
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
           --delta:  in UNSIGNED(k_trunc - 1 downto 0);       -- what is the size
            --k       : in integer;                                    -- what is the range
-           res :   out UNSIGNED(n_bits - 1 downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
-           frac_output:   out unsigned (mL - 1  downto 0)); -- replaced with ML
+           res :   out UNSIGNED(3+ k_trunc downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
+           frac_output:   out unsigned (k_trunc -1  downto 0)); -- replaced with ML
 
-end log_v1;
+end ecLog;
 
 
-architecture Behavioral of log_v1 is
+architecture Behavioral of ecLog is
 
 component log_v1 is
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
@@ -78,7 +78,7 @@ begin
     char <= TO_UNSIGNED(log,n_bits);        -- converting log to int 
     lg <= char(n_bits-k_trunc-1 downto 0) & frac(k_trunc downto 0); -- concatenating char,frac
     res <= lg + delta; --Need to get this here based on the frac 
-    frac_output <= frac;
+    frac_output <= frac(n_bits-1 downto n_bits-1-k_trunc);
 
     
 
