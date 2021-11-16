@@ -172,7 +172,7 @@ begin
                 -- end if;
                 sample := sample + 1;
                 if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
-                    error <= (to_integer(unsigned(result)) / 6) - 11;
+                    error <= (to_integer(unsigned(result)) / 11) - 14;
                     -- var := to_integer(unsigned(result)) mod rn_range;
                     -- var := to_integer(unsigned(result)) - 45;
     --                          if (var > rn_range) then
