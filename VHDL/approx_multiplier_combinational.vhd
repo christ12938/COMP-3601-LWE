@@ -22,22 +22,22 @@ entity approx_multiplier_combinational is
     Port ( --clk : in STD_LOGIC;
            --reset : in STD_LOGIC;
            --start : in STD_LOGIC;
-           input_a : in unsigned(mul_bits-1 downto 0) ;
-           input_b : in unsigned(mul_bits -1 downto 0);
-           output   : out unsigned (2*mul_bits -1 downto 0));
+           input_a : in unsigned(n_bits-1 downto 0) ;
+           input_b : in unsigned(n_bits -1 downto 0);
+           output   : out unsigned (2*n_bits -1 downto 0));
            --finished_operation  : out std_logic);
            
 end approx_multiplier_combinational;
 
-architecture Behavioral of approx_multiplier is
+architecture Behavioral of approx_multiplier_combinational is
 
 component ecLog
  
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
-          delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
+          --delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
          --  k       : in integer;                                    -- what is the range
-           res :   out UNSIGNED(n_bits - 1 downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
-           frac_output:   out unsigned (mL - 1  downto 0)); -- replaced with ML
+           res :   out UNSIGNED(3+ k_trunc downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
+           frac_output:   out unsigned (k_trunc-1  downto 0)); -- replaced with ML
  
     end component;
     
@@ -48,28 +48,24 @@ component ecLog
     
     component ecExp is port (
             input : in UNSIGNED(n_bits - 1 downto 0);
-           delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
+           --delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
           -- k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(n_bits - 1 downto 0));
     end component;
     
---type approx_mul_state is (
---		idle,
---		get_log_delta,
---		get_delta_exp,
---		final
---	);
+
+
 
 --	constant BLOCK_RAM_DELAY : positive := 1; -- what is this one 
 
 	
     signal delta_log_A: unsigned(k_trunc - 1 downto 0);
     signal delta_log_B: unsigned (k_trunc -1 downto 0);
-    signal delta_exp:   unsigned (k_trunc -1 downto 0);
+   -- signal delta_exp:   unsigned (k_trunc -1 downto 0);
     
-    signal delta_addr_A: unsigned (ml -1 downto 0);
-    signal delta_addr_B: unsigned (ml -1 downto 0);
-    signal delta_addr_exp: unsigned (me -1 downto 0);
+    --signal delta_addr_A: unsigned (ml -1 downto 0);
+   -- signal delta_addr_B: unsigned (ml -1 downto 0);
+    --signal delta_addr_exp: unsigned (me -1 downto 0);
     
 --    signal next_state : approx_mul_state;
     
@@ -82,7 +78,7 @@ component ecLog
     signal approx_log_B:    unsigned (3+ k_trunc downto 0);  -- max integer size: 4 --> 4 + k_trunc (size of frac)
     
     signal ecExp_input : unsigned (3+ k_trunc downto 0);
-    signal res: unsigned(2*mul_bits -1 downto )
+    signal exp_output: unsigned (2*mul_bits -1 downto 0);
 
 begin
 
@@ -92,7 +88,7 @@ begin
 aLog: ecLog port map ( 
                             
                              input  => input_a,
-                             delta   => delta_log_A, 
+                             --delta   => delta_log_A, 
                             -- k => k,            -- how are we getting this
                              res => approx_log_A,
                              frac_output => frac_A );  -- why it's "u" ?
@@ -100,17 +96,19 @@ aLog: ecLog port map (
 bLog: ecLog port map ( 
                             
                              input  => input_b,
-                             delta   => delta_log_B,
+                             --delta   => delta_log_B,
                              --k => k,
                              res => approx_log_B,
                              frac_output => frac_A);
-
+                             
+ecExp_input <= approx_log_A;
+-- + approx_log_B;
+ 
 -- get exp delta
-exp: ecExp port map (
-                            input => ecExp_input,
-                            delta => delta_exp,
-                            res   => output);
-
+--exp: ecExp port map (
+--                            input => ecExp_input,
+--                            --delta => delta_exp,
+--                            res   => output);
 
     
 end Behavioral;
