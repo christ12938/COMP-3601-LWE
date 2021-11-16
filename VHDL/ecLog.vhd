@@ -72,7 +72,7 @@ begin
                                        log => log,
                                        output => frac);
 
-    get_delta: log_deltas port map( frac => frac,
+    get_delta: log_deltas port map( frac => frac(n_bits-1 downto n_bits-7), -- replace this with ML
                                     delta => delta);
                             
     char <= TO_UNSIGNED(log,n_bits);        -- converting log to int 

@@ -174,6 +174,7 @@ begin
         when "1111101" => delta <= "000000011010010";
         when "1111110" => delta <= "000000010001101";
         when "1111111" => delta <= "000000001000110";
+        when others => delta <= "000000000000000";
     end case;
 end process;
 
