@@ -241,7 +241,8 @@ begin
 	-- ----------------------------- Debug Printing -------------------------------
 	debug_printing : process
 
-		constant DO_PRINT : boolean := true;
+		constant DO_PRINT : boolean := false;
+		
 		constant FILE_NAME : string := "encryption_v2_debug_bit_";
 		constant MAX_FILES : integer := 16;
 
