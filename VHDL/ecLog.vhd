@@ -39,8 +39,8 @@ end ecLog;
 
 architecture Behavioral of ecLog is
 
-component log_v1 is
-    Port ( input : in UNSIGNED(n_bits - 1 downto 0);
+component log_v2 is
+    Port ( input : in std_logic_vector(n_bits - 1 downto 0);
            res : out integer range 0 to n_bits - 1); 
 end component; 
 
@@ -65,7 +65,7 @@ signal char : unsigned(3 downto 0);
 begin
 
 
-   get_log: log_v1 port map (input => input,
+   get_log: log_v2 port map (input => std_logic_vector(input),
                             res => log);
                             
    get_frac: barell_shifter port map ( input => input,

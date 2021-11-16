@@ -41,10 +41,7 @@ component ecLog
  
     end component;
     
-    component log_v1 is
-    Port ( input : in UNSIGNED(n_bits - 1 downto 0);
-           res : out integer range 0 to n_bits - 1); 
-    end component; 
+
     
     component ecExp is port (
             input : in UNSIGNED(n_bits - 1 downto 0);
@@ -52,22 +49,10 @@ component ecLog
           -- k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(n_bits - 1 downto 0));
     end component;
-    
-
-
-
---	constant BLOCK_RAM_DELAY : positive := 1; -- what is this one 
-
-	
+    	
     signal delta_log_A: unsigned(k_trunc - 1 downto 0);
     signal delta_log_B: unsigned (k_trunc -1 downto 0);
-   -- signal delta_exp:   unsigned (k_trunc -1 downto 0);
-    
-    --signal delta_addr_A: unsigned (ml -1 downto 0);
-   -- signal delta_addr_B: unsigned (ml -1 downto 0);
-    --signal delta_addr_exp: unsigned (me -1 downto 0);
-    
---    signal next_state : approx_mul_state;
+
     
     signal frac_A     : unsigned (k_trunc -1 downto 0);
     signal frac_B     : unsigned (k_trunc -1 downto 0);

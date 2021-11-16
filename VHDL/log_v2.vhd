@@ -17,10 +17,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.data_types.all;
-use ieee.numeric_std.all;
 
 entity log is
-		port ( input : in unsigned(n_bits - 1 downto 0);
+		port ( input : in std_logic_vector(n_bits - 1 downto 0);
 					 res : out integer range 0 to n_bits - 1);
 end log;
 
