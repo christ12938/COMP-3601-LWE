@@ -59,8 +59,8 @@ end component;
 signal log : integer range n_bits to 0;
 signal frac : UNSIGNED( n_bits -1 downto 0);   -- will be trunctuated to have k bits
 signal delta: unsigned(k_trunc-1 downto 0);
-signal lg: unsigned(n_bits-1 downto 0);
-signal char : unsigned(n_bits downto 0);
+signal lg: unsigned(3+k_trunc downto 0);
+signal char : unsigned(3 downto 0);
 
 begin
 
@@ -75,10 +75,10 @@ begin
     get_delta: log_deltas port map( frac => frac(n_bits-1 downto n_bits-7), -- replace this with ML
                                     delta => delta);
                             
-    char <= TO_UNSIGNED(log,n_bits);        -- converting log to int 
-    lg <= char(n_bits-k_trunc-1 downto 0) & frac(k_trunc downto 0); -- concatenating char,frac
+    char <= TO_UNSIGNED(log,4);        -- converting log to int 
+    lg <= char & frac(k_trunc-1 downto 0); -- concatenating char,frac
     res <= lg + delta; --Need to get this here based on the frac 
-    frac_output <= frac(n_bits-1 downto n_bits-1-k_trunc);
+    frac_output <= frac(n_bits-1 downto n_bits-k_trunc);
 
     
 
