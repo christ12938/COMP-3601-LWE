@@ -62,7 +62,7 @@ architecture Behavioral of error_generator is
     signal debug_var : integer;
 
 begin
-    rn_range <= 2 * max_cap + 1;
+    rn_range <= 2 * max_cap;
     rn_range_vector <=  std_logic_vector(to_unsigned(rn_range, n_bits));
 
 --    get_log : log port map ( input => rn_range_vector,
@@ -78,39 +78,114 @@ begin
         start_signal  => '1',
         random_number => random_number_signal );
 
-    process(clk, reset)
-        variable sample :integer := 0;
-        variable var: integer;
-        variable result: std_logic_vector(n_bits - 1 downto 0);
-        constant NUM_SAMPLES: positive := 5;
-    begin
-        debug_sample <= sample;
-        debug_result <= result;
-        debug_var <= var;
+    config_1_gen : if CONFIG = 1 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
 
-        if reset = '1' or start_signal = '0' then
-            result := (others => '0');
-            done <= '0';
-            sample := 0;
-        elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
-            result := result + random_number_signal;
-            -- if (to_integer(unsigned(result)) > rn_range) then
-                -- result := result - rn_range;
-            -- end if;
-            sample := sample + 1;
-            if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
-
-                var := to_integer(unsigned(result)) mod rn_range;
-                -- var := to_integer(unsigned(result)) - 45;
---                          if (var > rn_range) then
---                          var := var - rn_range;
---                          end if;
-                error <= var - max_cap;
-                -- error <= var / 7;
-                done <= '1';
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 4) - 1;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
             end if;
-        end if;
-    end process;
+        end process;
+    end generate;
+
+    config_2_gen : if CONFIG = 2 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
+
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 7) - 4;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
+            end if;
+        end process;
+    end generate;
+
+    config_3_gen : if CONFIG = 3 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
+
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 6) - 11;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
+            end if;
+        end process;
+    end generate;
+
 
 
 end Behavioral;

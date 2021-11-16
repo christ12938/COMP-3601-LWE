@@ -117,7 +117,7 @@ architecture behavioural of key_generation is
 	signal counter_b_reset_synchronous : std_logic := '0';
 
 	-- Counter to count how many clocks gen_b is taking
-	constant GEN_B_CLOCKS : positive := 5;
+	constant GEN_B_CLOCKS : positive := 12;
 	signal counter_c_enable : std_logic := '0';
 	signal counter_c : integer range 0 to GEN_B_CLOCKS := 0;
 	signal counter_c_reset_synchronous : std_logic := '0';

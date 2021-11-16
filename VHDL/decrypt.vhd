@@ -65,7 +65,20 @@ begin
 --    end generate;
     -- If else generate is only supported in VHDL 2008 so I have to do this
 --    condition_generation_config_others : if CONFIG = 2 or CONFIG = 1 generate
-    M <= '1' when ((q / 4) <= dec and dec <= (3 * (q / 4))) else '0';
+    condition_config_1 : if CONFIG = 1 generate
+        M <= '1' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '0';
+    end generate;
+
+    condition_config_2 : if CONFIG = 2 generate
+        M <= '0' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '1';
+    end generate;
+
+    condition_config_3 : if CONFIG = 2 generate
+        M <= '0' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '1';
+    end generate;
+
+
+    -- M <= '1' when ((q / 4) <= dec and dec <= (3 * (q / 4))) else '0';
 
     -- M <= '0' when dec <= (q / 4) else '1';
 --	end generate;

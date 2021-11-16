@@ -66,7 +66,7 @@ architecture Behavioral of genB is
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
 
-    type state_type is (S1, S2, S3);
+    type state_type is (S1, S2);
     signal state : state_type;
     signal errorGen_done : std_logic;
     signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
@@ -99,10 +99,10 @@ begin
                 when S1 =>
                     if Start = '0' then state <= S1; else state <= S2; end if;
                 when S2 =>
-                    if errorGen_done = '1' then state <= S3; else state <= S2; end if;
-                when S3 =>
-                    -- if Start = '1' then state <= S3; else state <= S1; end if;
-                    state <= S1;
+                    if errorGen_done = '1' then state <= S1; else state <= S2; end if;
+                -- when S3 =>
+                --     if Start = '1' then state <= S3; else state <= S1; end if;
+                --     state <= S1;
             end case;
         end if;
     end process;
@@ -111,7 +111,7 @@ begin
     begin
         -- Default
         modulue_start <= '0';
-        Done <= '0';
+        -- Done <= '0';
 
         case state is
             when S1 =>
@@ -120,8 +120,8 @@ begin
             when S2 =>
                 modulue_start <= '1';
 
-            when S3 =>
-                Done <= '1';
+            -- when S3 =>
+            --     Done <= '1';
 
         end case;
     end process;
@@ -141,7 +141,7 @@ begin
         done => errorGen_done,
         error => errorGen_result
     );
-
+    Done <= errorGen_done;
     -- errorGen_result <= 0;
 
     modu: modulus_combinational port map(
