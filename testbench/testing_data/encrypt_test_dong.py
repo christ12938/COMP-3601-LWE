@@ -8,10 +8,15 @@ The above will run the test on
 """
 import sys
 
-FILE_NAME : str = "encryption_v2_debug_bit_"
-A_HEIGHT : int = 8192
-A_WIDTH : int = 8
-Q : int = 3347
+Q: int = 3347
+A_WIDTH: int = 8
+A_HEIGHT: int = 8192
+
+FILE_NAME : str = "config2/encryption_v2_debug_bit_"
+# FILE_NAME : str = "config3_0/encryption_v2_debug_bit_"
+# A_HEIGHT : int = 32768
+# A_WIDTH : int = 16
+# Q : int = 35879
 
 def main():
     if len(sys.argv) != 2:
@@ -34,7 +39,7 @@ def run_encrypt(data: list):
         data[i] = data[i].split(" ")
         data[i] = [int(x) for x in data[i]]
 
-    sum_a: list = [0, 0, 0, 0, 0, 0, 0, 0]
+    sum_a: list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     u: list = []
     sum_b: int = 0
     v: int = 0
@@ -42,6 +47,7 @@ def run_encrypt(data: list):
     # Do sum_a
     for j in range(A_WIDTH):
         for i in range(A_HEIGHT // 4):
+            # print(i, j)
             sum_a[j] += data[i][j + 1]
 
     # Do sum_b

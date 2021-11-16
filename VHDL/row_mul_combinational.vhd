@@ -32,18 +32,17 @@ entity row_mul_combinational is
 	generic (
 		mul_bits : natural := mul_bits
 		);
-	Port ( A : in array_mul_t;
-           S : in array_mul_t;
+	Port ( A : in array_mul_t(0 to a_width - 1);
+           S : in array_mul_t(0 to a_width - 1);
           --  reset, start : in std_logic;
-           result : out unsigned);
+           result : out unsigned(mul_bits - 1 downto 0));
 end row_mul_combinational;
 
 architecture Behavioral of row_mul_combinational is
-
 begin
   p_IMAGE : process(A, S)
-    variable productTemp : unsigned( mul_bits - 1 downto 0);
-    variable sumTemp : unsigned ( mul_bits - 1 downto 0);
+    variable productTemp : unsigned(2 * mul_bits - 1 downto 0);
+    variable sumTemp : unsigned(mul_bits - 1 downto 0);
 --    variable productTemp : integer := 0;
 --    variable sumTemp : integer := 0;
   begin
@@ -52,12 +51,12 @@ begin
     --     sumTemp := TO_UNSIGNED(0, mul_bits);
 
     -- elsif start = '1' then
-    productTemp := TO_UNSIGNED(0, mul_bits);
-    sumTemp := TO_UNSIGNED(0, mul_bits);
+    productTemp := TO_UNSIGNED(0, productTemp'length);
+    sumTemp := TO_UNSIGNED(0, sumTemp'length);
     for ii in 0 to (a_width - 1) loop
-      productTemp := TO_UNSIGNED(TO_INTEGER(A(ii)) * TO_INTEGER(S(ii)), mul_bits);
+      productTemp := A(ii) * S(ii);
 --        productTemp := A(ii)*S(ii);
-      sumTemp := sumTemp + productTemp;
+      sumTemp := sumTemp + resize(productTemp, sumTemp'length);
       -- report ("COL = "  & natural'image(ii) & " A(ii)="& integer'image(TO_INTEGER(A(ii))) & " S(ii)="& integer'image(TO_INTEGER(S(ii))) &
               -- " SUM = " & integer'image(TO_INTEGER(sumTemp)) & " PRODUCT = " & integer'image(TO_INTEGER(productTemp))) severity note;
     end loop;

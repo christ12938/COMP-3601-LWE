@@ -41,7 +41,7 @@ architecture Behavioral of uniform_rng is
 			divisor_width : natural
 		);
 		port (
-			Dividend : IN UNSIGNED(dividend_width - 1 DOWNTO 0);
+			Dividend : IN SIGNED(dividend_width - 1 DOWNTO 0);
 			Divisor : IN UNSIGNED(divisor_width - 1 DOWNTO 0);
 			Modulo : OUT UNSIGNED(divisor_width - 1 DOWNTO 0)
 		);
@@ -76,7 +76,7 @@ begin
 		divisor_width => n_bits
 	)
 	port map (
-		Dividend => UNSIGNED(sampled_down_internal_state),
+		Dividend => SIGNED(sampled_down_internal_state),
 		Divisor => UNSIGNED(cap),
 		Modulo => modded_random_number
 	);

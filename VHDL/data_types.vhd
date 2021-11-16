@@ -40,19 +40,11 @@ package data_types is
 	-- Block RAM data width for the primes is n_bits
 	constant b_bram_data_width : natural := a_bram_data_width;
 	constant b_bram_address_width : natural := a_bram_address_width;
+	function error_range return integer;
 
 	-- ----------------------------------------------------------------------------
 	--                                  Seeding
 	-- ----------------------------------------------------------------------------
-	-- Master seed for the seed generator, always 32 bits
-	-- FIXME currently set to 64 bits for experimentation
-	-- constant MASTER_SEED : unsigned(63 downto 0) := b"1101100111111001100100110001110011110010001000100010000010000100";
-
-	-- Seed for the random number generator
-	-- Number will just be truncated when n_bits is smaller
-	-- FIXME deprecated
---	constant SEED : unsigned(63 downto 0) := x"0000000000000000";
-
 	-- We don't need 20 seeds but just in case
 	constant NUM_SEEDS : positive := 20;
 	type seed_array_t is array(natural range 0 to NUM_SEEDS - 1) of unsigned(63 downto 0);
@@ -104,7 +96,7 @@ package data_types is
 	-- type myMatrix is array(natural range <>, natural range <>) of integer;
 	-- Record for storing encrypted message (u,v) : output of encryotion and input for decryption
 	type encryptedMsg is record
-		u : array_t(0 to a_width-1);
+		u : array_t(0 to a_width - 1);
 		v : unsigned(n_bits - 1 downto 0);
 	end record encryptedMsg;
 
@@ -181,7 +173,7 @@ package body data_types is
 		when 1 => return 18;
 		when 2 => return 31;
 		when 3 => return 37;
-		when others => return 36;
+		when others => return 37;
 		end case;
 	end;
 
@@ -232,6 +224,16 @@ package body data_types is
 		when 2 => return 25;
 		when 3 => return 30;
 		when others => return n_bits;
+		end case;
+	end;
+
+	function error_range return integer is
+  begin
+		case CONFIG is
+		when 1 => return 1;
+		when 2 => return 4;
+		when 3 => return 16;
+		when others => return 16;
 		end case;
 	end;
 

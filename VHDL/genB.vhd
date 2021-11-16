@@ -61,7 +61,7 @@ architecture Behavioral of genB is
 
     component modulus_combinational is
 	   Port(
-			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
+			Dividend                : IN		SIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
@@ -78,7 +78,12 @@ architecture Behavioral of genB is
     signal a_temp : array_mul_t(0 to a_width - 1);
 	signal s_temp : array_mul_t(0 to a_width - 1);
 
+    signal temp : integer;
+
 begin
+    temp <= error_range;
+
+
     -- Conversion from array_t to array_mul_t using resize()
     array_conversion : for i in 0 to a_width - 1 generate
     	a_temp(i) <= resize(A(i), mul_bits);
@@ -122,22 +127,25 @@ begin
     end process;
 
     row_mul: row_mul_combinational port map (
-            A => a_temp,
-            S => s_temp,
-            result => rowMul_result);
+        A => a_temp,
+        S => s_temp,
+        result => rowMul_result);
 
     err_gen: error_generator port map (
-            max_cap => 1,
-            clk => Clock,
-            reset => Reset,
-            seed => seed,
-            seed_valid => seed_valid,
-            start_signal => modulue_start,
-            done => errorGen_done,
-            error => errorGen_result);
+        max_cap => temp,
+        clk => Clock,
+        reset => Reset,
+        seed => seed,
+        seed_valid => seed_valid,
+        start_signal => modulue_start,
+        done => errorGen_done,
+        error => errorGen_result
+    );
+
+    -- errorGen_result <= 0;
 
     modu: modulus_combinational port map(
-            Dividend => modulus_input,
+            Dividend => signed(modulus_input),
             Divisor => Q,
             Modulo => B);
 

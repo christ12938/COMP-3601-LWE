@@ -144,13 +144,15 @@ begin
 		random_prime => q_out
 	);
 
+	-- q_out <= to_unsigned(127, q_out'length);
+
 	-- Generate a_width generators, these generators are used for A and s
 	rng_bank : for i in 0 to a_width - 1 generate
 		rng : uniform_rng
 		port map (
 			-- seed => std_logic_vector(seed_gen_out),
 			seed => std_logic_vector(SEEDS(i)),
-			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
+			cap => std_logic_vector(q_in),
 			clk => clock,
 			reset => reset or rng_bank_seed_valid(i),
 			unsigned(random_number) => rng_out(i),
