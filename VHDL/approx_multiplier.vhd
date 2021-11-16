@@ -46,11 +46,9 @@ component ecLog
            res : out integer range 0 to n_bits - 1); 
     end component; 
     
-    component ecExp is port (
-            input : in UNSIGNED(n_bits - 1 downto 0);
-           delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
-          -- k       : in integer;                                    -- what is the range
-           res :   out UNSIGNED(n_bits - 1 downto 0));
+    component ecExp is Port ( input : in UNSIGNED(3+ k_trunc  downto 0);
+           delta:  in UNSIGNED(k_trunc -1 downto 0);       
+           res :   out UNSIGNED(2*mul_bits -1 downto 0));
     end component;
     
 type approx_mul_state is (

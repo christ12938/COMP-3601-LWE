@@ -28,6 +28,9 @@ package data_types is
 	constant s_height : natural := a_width;	-- Height of vector s
 	constant u_height : natural := a_width;	-- Height of vector u
 
+	function mL return natural;
+  function mE return natural;
+  function k_trunc return natural;
 	function min_q return natural;	-- Minimum q
 	function max_q return natural;	-- Maximum q
 	function n_bits return natural;	-- Bit width based on q (not exactly the bit width of q), most signals should have this bit width
