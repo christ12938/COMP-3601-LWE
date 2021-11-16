@@ -29,7 +29,7 @@ USE WORK.DATA_TYPES.ALL;
 
 entity log_v1 is
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
-          delta:  in UNSIGNED(k_trunc - 1 downto 0);       -- what is the size
+          --delta:  in UNSIGNED(k_trunc - 1 downto 0);       -- what is the size
            --k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(n_bits - 1 downto 0);   -- how should we return the output ? what is the size of the output after trunctuation
            frac_output:   out unsigned (mL - 1  downto 0)); -- replaced with ML
@@ -50,9 +50,17 @@ component barell_shifter is
                output : out UNSIGNED(n_bits-1 downto 0));
 end component;
     
+    
+component log_deltas is
+    Port (frac : in unsigned(6 downto 0);
+          delta : out unsigned(k_trunc-1 downto 0));
+end component;    
 --signal log : std_logic_vector ( 
 signal log : integer range n_bits to 0;
 signal frac : UNSIGNED( n_bits -1 downto 0);   -- will be trunctuated to have k bits
+signal delta: unsigned(k_trunc-1 downto 0);
+signal lg: unsigned(n_bits-1 downto 0);
+signal char : unsigned(n_bits downto 0);
 
 begin
 
@@ -63,16 +71,15 @@ begin
    get_frac: barell_shifter port map ( input => input,
                                        log => log,
                                        output => frac);
-process(input)
-variable lg: unsigned(n_bits-1 downto 0);
-variable char : unsigned(n_bits downto 0);
 
-begin                              
-    char:= TO_UNSIGNED(log,n_bits);        -- converting log to int 
-    lg := char(n_bits-k-1 downto 0) & frac(k downto 0); -- concatenating char,frac
+    get_delta: log_deltas port map( frac => frac,
+                                    delta => delta);
+                            
+    char <= TO_UNSIGNED(log,n_bits);        -- converting log to int 
+    lg <= char(n_bits-k_trunc-1 downto 0) & frac(k_trunc downto 0); -- concatenating char,frac
     res <= lg + delta; --Need to get this here based on the frac 
     frac_output <= frac;
-end process;
+
     
 
 end Behavioral;

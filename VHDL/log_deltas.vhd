@@ -23,6 +23,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE WORK.DATA_TYPES.ALL;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -35,7 +37,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity log_deltas is
     Port (frac : in unsigned(6 downto 0);
-          delta : out unsigned(14 downto 0));
+          delta : out unsigned(k_trunc-1 downto 0));
 end log_deltas;
 
 architecture Behavioral of log_deltas is
