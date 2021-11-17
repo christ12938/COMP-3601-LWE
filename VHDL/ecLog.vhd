@@ -41,17 +41,18 @@ architecture Behavioral of ecLog is
 
 component log_v2 is
     Port ( input : in std_logic_vector(n_bits - 1 downto 0);
-           res : out integer range 0 to n_bits - 1); 
-end component; 
+           res : out integer range 0 to n_bits - 1);
+end component;
 
 
-    
-    
+
+
 component log_deltas is
     Port (frac : in unsigned(mL - 1 downto 0);
           delta : out unsigned(k_trunc-1 downto 0));
-end component;    
---signal log : std_logic_vector ( 
+end component;
+
+--signal log : std_logic_vector (
 signal log : integer range 0 to n_bits; --TODO
 signal frac : UNSIGNED( k_trunc - 1 downto 0);   -- will be trunctuated to have k bits
 signal delta: unsigned(k_trunc-1 downto 0);
@@ -59,21 +60,21 @@ signal lg: unsigned(3+k_trunc downto 0);
 signal char : unsigned(3 downto 0);
 begin
 
-   
+
    get_log: log_v2 port map (input => std_logic_vector(input),
                             res => log);
 
 
-    get_delta: log_deltas port map( frac => frac(k_trunc - 1 downto k_trunc - mL), 
+    get_delta: log_deltas port map( frac => frac(k_trunc - 1 downto k_trunc - mL),
                                     delta => delta);
-                                
+
     frac <= (others=>'0') when log = 0 else
             unsigned(shift_left(resize(unsigned(input), k_trunc), k_trunc - log));
-                                              
-    char <= TO_UNSIGNED(log,4);  --?      -- converting log to int 
+
+    char <= TO_UNSIGNED(log,4);  --?      -- converting log to int
     lg <= char & frac; -- concatenating char,frac
-    res <= lg + delta; --Need to get this here based on the frac 
-    
-    
+    res <= lg + delta; --Need to get this here based on the frac
+
+
 
 end Behavioral;

@@ -36,7 +36,7 @@ component approx_multiplier_combinational is
 					 input_b : in unsigned(n_bits - 1 downto 0);
 					 output   : out unsigned (mul_bits - 1 downto 0));
 end component;
-	constant NUM_MULS : positive := 4;
+	constant NUM_MULS : positive := a_width;
 	-- signal input_a: unsigned(n_bits-1 downto 0);
 	-- signal input_b: unsigned(n_bits-1 downto 0);
 	signal res : array_mul_t(0 to NUM_MULS - 1);
@@ -48,7 +48,7 @@ end component;
 
 
 begin
-	config_1_muls : if CONFIG = 1 generate
+	-- config_1_muls : if CONFIG = 1 generate
 		mul_gen : for i in 0 to NUM_MULS - 1 generate
 			approx_multiply: approx_multiplier_combinational port map (
 				input_a => A(i),
@@ -58,7 +58,7 @@ begin
 			debug_actual(i) <= resize(A(i) * S(i), res(i)'length);
 			debug_diff(i) <= signed(debug_actual(i)) - signed(res(i));
 		end generate;
-	end generate;
+	-- end generate;
 
 	p_IMAGE : process(A, S, res)
 		-- variable productTemp : unsigned(mul_bits - 1 downto 0);
