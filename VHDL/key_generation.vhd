@@ -59,13 +59,13 @@ architecture behavioural of key_generation is
 
 	component genB is
 		port (
-			clock, reset, start : in std_logic;
+			--clock, reset, start : in std_logic;
 			A, S : in array_t(0 to a_width - 1);
 			seed : in unsigned(63 downto 0);
 			seed_valid : in std_logic;
 			Q : in unsigned(n_bits - 1 downto 0);
-			B : out unsigned(n_bits - 1 downto 0);
-			done : out std_logic
+			B : out unsigned(n_bits - 1 downto 0)
+			--done : out std_logic
 		);
 	end component;
 
@@ -152,7 +152,7 @@ begin
 			seed => std_logic_vector(SEEDS(i)),
 			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
 			clk => clock,
-			reset => reset or rng_bank_seed_valid(i),
+			reset => reset,
 			unsigned(random_number) => rng_out(i),
 			start_signal => '1'
 		);
@@ -174,16 +174,16 @@ begin
 	-- Vector B generation module
 	gen_b : genB
 	port map (
-		Clock => clock,
-		Reset => reset,
-		Start => gen_b_start,
+		--Clock => clock,
+		--Reset => reset,
+		--Start => gen_b_start,
 		seed => SEEDS(17),
 		seed_valid => gen_b_seed_valid,
 		A => a_in,
 		S => s_in,
 		Q => q_in,
-		B => b_out,
-		Done => gen_b_done
+		B => b_out
+		--Done => gen_b_done
 	);
 
 	-- Counter for matrix A height
