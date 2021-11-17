@@ -30,13 +30,13 @@ use work.data_types.ALL;
 --use UNISIM.VComponents.all;
 
 entity genB is
-    Port(   Clock, Reset, Start : in std_logic;
+    Port(   --Clock, Reset, Start: in std_logic;
             A, S : in array_t (0 to a_width-1);
             seed : in unsigned(63 downto 0);
             seed_valid : in std_logic;
             Q : in unsigned (n_bits - 1 DOWNTO 0);
-            B : out unsigned(n_bits - 1 DOWNTO 0);
-            Done : out std_logic);
+            B : out unsigned(n_bits - 1 DOWNTO 0));
+           -- Done : out std_logic);
 end genB;
 
 architecture Behavioral of genB is
@@ -50,15 +50,6 @@ architecture Behavioral of genB is
             result : out unsigned);
     end component;
 
-    component error_generator is
-        Port ( max_cap : in integer;
-            clk,reset,start_signal   :in std_logic;
-            seed : in unsigned(63 downto 0);
-            seed_valid : in std_logic;
-            done     : out std_logic;
-            error    : out integer);
-    end component;
-
     component modulus_combinational is
 	   Port(
 			Dividend                : IN		UNSIGNED(mul_bits - 1 DOWNTO 0);
@@ -67,12 +58,8 @@ architecture Behavioral of genB is
     end component;
 
     type state_type is (S1, S2, S3);
-    signal state : state_type;
-    signal errorGen_done : std_logic;
     signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
     signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
-    signal errorGen_result : integer;
-    signal modulue_start: std_logic;
 
     -- Temporary signals for conversion
     signal a_temp : array_mul_t(0 to a_width - 1);
@@ -80,67 +67,23 @@ architecture Behavioral of genB is
 
 begin
     -- Conversion from array_t to array_mul_t using resize()
-    array_conversion : for i in 0 to a_width - 1 generate
-    	a_temp(i) <= resize(A(i), mul_bits);
-    	s_temp(i) <= resize(S(i), mul_bits);
-    end generate;
+array_conversion : for i in 0 to a_width - 1 generate
+    a_temp(i) <= resize(A(i), mul_bits);
+    s_temp(i) <= resize(S(i), mul_bits);
+end generate;
 
-    FSM_transitions: process (Reset, Clock)
-    begin
-        if Reset = '1'then
-            state <= S1;
-        elsif rising_edge(Clock) then
-            case state is
-                when S1 =>
-                    if Start = '0' then state <= S1; else state <= S2; end if;
-                when S2 =>
-                    if errorGen_done = '1' then state <= S3; else state <= S2; end if;
-                when S3 =>
-                    -- if Start = '1' then state <= S3; else state <= S1; end if;
-                    state <= S1;
-            end case;
-        end if;
-    end process;
 
-    do: process (state)
-    begin
-        -- Default
-        modulue_start <= '0';
-        Done <= '0';
 
-        case state is
-            when S1 =>
-            -- Signals should be in their defaults
+row_mul: row_mul_combinational port map (
+        A => a_temp,
+        S => s_temp,
+        result =>  modulus_input);
 
-            when S2 =>
-                modulue_start <= '1';
 
-            when S3 =>
-                Done <= '1';
+modu: modulus_combinational port map(
+        Dividend => modulus_input,
+        Divisor => Q,
+        Modulo => B);
 
-        end case;
-    end process;
-
-    row_mul: row_mul_combinational port map (
-            A => a_temp,
-            S => s_temp,
-            result => rowMul_result);
-
-    err_gen: error_generator port map (
-            max_cap => 1,
-            clk => Clock,
-            reset => Reset,
-            seed => seed,
-            seed_valid => seed_valid,
-            start_signal => modulue_start,
-            done => errorGen_done,
-            error => errorGen_result);
-
-    modu: modulus_combinational port map(
-            Dividend => modulus_input,
-            Divisor => Q,
-            Modulo => B);
-
-    modulus_input <= rowMul_result + errorGen_result;
 
 end Behavioral;
