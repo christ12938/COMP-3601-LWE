@@ -117,7 +117,7 @@ architecture behavioural of key_generation is
 	signal counter_b_reset_synchronous : std_logic := '0';
 
 	-- Counter to count how many clocks gen_b is taking
-	constant GEN_B_CLOCKS : positive := 5;
+	constant GEN_B_CLOCKS : positive := 12;
 	signal counter_c_enable : std_logic := '0';
 	signal counter_c : integer range 0 to GEN_B_CLOCKS := 0;
 	signal counter_c_reset_synchronous : std_logic := '0';
@@ -144,13 +144,15 @@ begin
 		random_prime => q_out
 	);
 
+	-- q_out <= to_unsigned(127, q_out'length);
+
 	-- Generate a_width generators, these generators are used for A and s
 	rng_bank : for i in 0 to a_width - 1 generate
 		rng : uniform_rng
 		port map (
 			-- seed => std_logic_vector(seed_gen_out),
 			seed => std_logic_vector(SEEDS(i)),
-			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
+			cap => std_logic_vector(q_in),
 			clk => clock,
 			reset => reset or rng_bank_seed_valid(i),
 			unsigned(random_number) => rng_out(i),

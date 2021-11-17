@@ -55,8 +55,11 @@ architecture Behavioral of error_generator is
     signal rn_range : integer;
     signal rn_range_vector : std_logic_vector(n_bits - 1 downto 0);
     signal width: integer;
-    signal fake_signal: std_logic;
+    -- signal fake_signal: std_logic;
     signal random_number_signal: std_logic_vector(n_bits - 1 downto 0);
+    signal debug_result : std_logic_vector(n_bits - 1 downto 0);
+    signal debug_sample : integer;
+    signal debug_var : integer;
 
 begin
     rn_range <= 2 * max_cap;
@@ -66,39 +69,123 @@ begin
 --                            res => width,
 --                            rng_start => fake_signal );
 
-    uniform_generator : uniform_rng port map ( cap         => rn_range_vector,
-                                 seed          => std_logic_vector(seed),
-                                 clk           => clk,
-                                 reset         => reset or seed_valid,
-                                 start_signal  => fake_signal,
-                                 random_number => random_number_signal );
+    uniform_generator : uniform_rng port map (
+        cap           => rn_range_vector,
+        -- cap => std_logic_vector(to_unsigned(10, n_bits)),
+        seed          => std_logic_vector(seed),
+        clk           => clk,
+        reset         => reset or seed_valid,
+        start_signal  => '1',
+        random_number => random_number_signal );
 
-    process(clk, reset)
-        variable sample :integer := 0;
-        variable var: integer;
-        variable result: std_logic_vector(n_bits - 1 downto 0);
+    config_1_gen : if CONFIG = 1 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
 
-    begin
-        if reset = '1' or start_signal = '0' then
-            result := (others => '0');
-            done <= '0';
-            sample := 0;
-        elsif rising_edge(clk) and start_signal = '1' and sample < 5 then
-            result := result + random_number_signal;
-            if (to_integer(unsigned(result)) > rn_range) then
-                result := result - rn_range;
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 4) - 1;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
             end if;
-            sample := sample +1;
-            if sample = 5 then         -- summing 10 uniform random numbers to get a random number
-                var := to_integer(unsigned(result));
---                          if (var > rn_range) then
---                          var := var - rn_range;
---                          end if;
-                error <= var - max_cap;
-                done <= '1';
+        end process;
+    end generate;
+
+    config_2_gen : if CONFIG = 2 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
+
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 7) - 4;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
             end if;
-        end if;
-    end process;
+        end process;
+    end generate;
+
+    config_3_gen : if CONFIG = 3 generate
+        process(clk, reset)
+            variable sample :integer := 0;
+            variable var: integer;
+            variable result: std_logic_vector(n_bits - 1 downto 0);
+            constant NUM_SAMPLES: positive := 10;
+        begin
+            debug_sample <= sample;
+            debug_result <= result;
+            debug_var <= var;
+
+            if reset = '1' or start_signal = '0' then
+                result := (others => '0');
+                done <= '0';
+                sample := 0;
+            elsif rising_edge(clk) and start_signal = '1' and sample < NUM_SAMPLES then
+                result := result + random_number_signal;
+                -- if (to_integer(unsigned(result)) > rn_range) then
+                    -- result := result - rn_range;
+                -- end if;
+                sample := sample + 1;
+                if sample = NUM_SAMPLES then         -- summing 10 uniform random numbers to get a random number
+                    error <= (to_integer(unsigned(result)) / 11) - 14;
+                    -- var := to_integer(unsigned(result)) mod rn_range;
+                    -- var := to_integer(unsigned(result)) - 45;
+    --                          if (var > rn_range) then
+    --                          var := var - rn_range;
+    --                          end if;
+                    -- error <= var - max_cap;
+                    -- error <= var / 7;
+                    done <= '1';
+                end if;
+            end if;
+        end process;
+    end generate;
+
 
 
 end Behavioral;

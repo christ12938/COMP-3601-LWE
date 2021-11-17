@@ -51,7 +51,7 @@ begin
     input_b => input_b,
     output => res
   );
-  
+
   p_IMAGE : process(A, S)
     variable productTemp : unsigned(2 * mul_bits - 1 downto 0);
     variable sumTemp : unsigned(mul_bits - 1 downto 0);

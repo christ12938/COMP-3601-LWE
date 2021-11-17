@@ -46,11 +46,11 @@ architecture behavioural of encryption_v2 is
 	-- ------------------------- Modulus Combinational ----------------------------
 	component modulus_combinational is
 		generic (
-			dividend_width : natural := encryption_sum_bits;
-			divisor_width : natural := encryption_sum_bits
+			dividend_width : natural := mul_bits;
+			divisor_width : natural := mul_bits
 		);
 		port (
-			dividend : in unsigned(dividend_width - 1 downto 0);
+			dividend : in signed(dividend_width - 1 downto 0);
 			divisor : in unsigned(divisor_width - 1 downto 0);
 			modulo : out unsigned(divisor_width - 1 downto 0)
 		);
@@ -66,7 +66,7 @@ architecture behavioural of encryption_v2 is
 		S_DONE
 	);
 
-	type array_sum_t is array(natural range <>) of unsigned(encryption_sum_bits - 1 downto 0);
+	type array_sum_t is array(natural range <>) of unsigned(mul_bits - 1 downto 0);
 
 	signal current_state : fsm_state := S_IDLE;
 	signal next_state : fsm_state := S_IDLE;
@@ -80,18 +80,18 @@ architecture behavioural of encryption_v2 is
 	signal a_reg_in, a_reg_out : array_sum_t(0 to a_width - 1) := (others => (others => '0'));
 	signal a_reg_write_enable : std_logic := '0';
 
-	signal b_reg_in, b_reg_out : unsigned(encryption_sum_bits - 1 downto 0) := (others => '0');
+	signal b_reg_in, b_reg_out : unsigned(mul_bits - 1 downto 0) := (others => '0');
 	signal b_reg_write_enable : std_logic := '0';
 
 	signal u_mod_out : array_t(0 to a_width - 1) := (others => (others => '0'));
 	signal v_mod_out : unsigned(n_bits - 1 downto 0) := (others => '0');
 
 	signal u_mod_temp : array_sum_t(0 to a_width - 1) := (others => (others => '0'));
-	signal v_mod_temp : unsigned(encryption_sum_bits - 1 downto 0) := (others => '0');
+	signal v_mod_temp : unsigned(mul_bits - 1 downto 0) := (others => '0');
 
 	signal a_reg_reset_synchronous, b_reg_reset_synchronous : std_logic := '0';
 
-	signal b_sum_temp_calculation : unsigned(encryption_sum_bits - 1 downto 0) := (others => '0');
+	signal b_sum_temp_calculation : unsigned(mul_bits - 1 downto 0) := (others => '0');
 
 begin
 
@@ -112,16 +112,16 @@ begin
 	-- -------------------------------- Modders -----------------------------------
 	u_modder_generate : for i in 0 to a_width - 1 generate
 		u_modder : modulus_combinational port map (
-			dividend => a_reg_out(i),
-			divisor => resize(q_in, encryption_sum_bits),
+			dividend => signed(a_reg_out(i)),
+			divisor => resize(q_in, mul_bits),
 			modulo => u_mod_temp(i)
 		);
 		u_mod_out(i) <= resize(u_mod_temp(i), u_mod_out(i)'length);
 	end generate;
 
 	v_modder : modulus_combinational port map (
-		dividend => b_sum_temp_calculation,
-		divisor => resize(q_in, encryption_sum_bits),
+		dividend => signed(b_sum_temp_calculation),
+		divisor => resize(q_in, mul_bits),
 		modulo => v_mod_temp
 	);
 	v_mod_out <= resize(v_mod_temp, v_mod_out'length);
@@ -241,7 +241,8 @@ begin
 	-- ----------------------------- Debug Printing -------------------------------
 	debug_printing : process
 
-		constant DO_PRINT : boolean := false;
+		constant DO_PRINT : boolean := true;
+		
 		constant FILE_NAME : string := "encryption_v2_debug_bit_";
 		constant MAX_FILES : integer := 16;
 
