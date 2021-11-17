@@ -11,7 +11,7 @@ entity gen_q is
 		clock : in std_logic;
 		reset : in std_logic;
 		seed : in unsigned(63 downto 0);
-		seed_valid : in std_logic;
+--		seed_valid : in std_logic;
 		random_prime : out unsigned(n_bits - 1 downto 0)
 	);
 end gen_q;
@@ -67,7 +67,7 @@ begin
 	rng : uniform_rng
 	port map (
 		clk => clock,
-		reset => reset or seed_valid,
+		reset => reset,
 		start_signal => start_rng,
 		seed => std_logic_vector(seed),
 		cap => std_logic_vector(to_unsigned(num_primes - 1, n_bits)),

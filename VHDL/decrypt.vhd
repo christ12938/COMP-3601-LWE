@@ -11,12 +11,9 @@ end decrypt;
 
 architecture Behavioral of decrypt is
 
-    component row_mul_combinational is
-       generic (
-          mul_bits : natural := mul_bits
-        );
-       Port ( A : in array_mul_t;
-            S : in array_mul_t;
+    component row_mul_original is
+       Port ( A : in array_t;
+            S : in array_t;
 --            reset, start : in std_logic;
             result : out unsigned);
     end component;
@@ -34,16 +31,16 @@ architecture Behavioral of decrypt is
     signal v_sub_u_dot_s : signed(mul_bits - 1 DOWNTO 0);
     signal dec: unsigned(n_bits - 1 DOWNTO 0);
     signal condition : unsigned(n_bits - 1 DOWNTO 0);
-    signal temp_u, temp_s : array_mul_t(0 to a_width - 1);
+--    signal temp_u, temp_s : array_mul_t(0 to a_width - 1);
 begin
-    conversion : for i in 0 to a_width - 1 generate
-        temp_u(i) <= resize(U(i), mul_bits);
-        temp_s(i) <= resize(S(i), mul_bits);
-    end generate;
+--    conversion : for i in 0 to a_width - 1 generate
+--        temp_u(i) <= resize(U(i), mul_bits);
+--        temp_s(i) <= resize(S(i), mul_bits);
+--    end generate;
 
-    row_mul: row_mul_combinational port map (
-            A => temp_u,
-            S => temp_s,
+    row_mul: row_mul_original port map (
+            A => U,
+            S => S,
 --            reset => '0',
 --            start => '1',
             result => u_dot_s);
@@ -56,18 +53,15 @@ begin
             Modulo => dec);
 
     v_sub_u_dot_s <= signed(resize(V, u_dot_s'length)) - signed(u_dot_s);
-    -- condition <= "00" & Q (n_bits - 1 DOWNTO 2);
-    -- condition <= Q / 4;
-    -- M <= '0' when dec < condition else
-        --  '1';
---	condition_generation_config_3 : if CONFIG = 3 generate
---    	M <= '1' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '0';
---    end generate;
-    -- If else generate is only supported in VHDL 2008 so I have to do this
---    condition_generation_config_others : if CONFIG = 2 or CONFIG = 1 generate
+
+
     condition_config_1 : if CONFIG = 1 generate
         M <= '1' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '0';
     end generate;
+
+    -- condition_config_1 : if CONFIG = 1 generate
+    --     M <= '0' when dec <= Q / 4 else '1';
+    -- end generate;
 
     condition_config_2 : if CONFIG = 2 generate
         M <= '0' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '1';

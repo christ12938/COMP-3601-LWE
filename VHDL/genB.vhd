@@ -32,8 +32,8 @@ use work.data_types.ALL;
 entity genB is
     Port(   --Clock, Reset, Start: in std_logic;
             A, S : in array_t (0 to a_width-1);
-            seed : in unsigned(63 downto 0);
-            seed_valid : in std_logic;
+            -- seed : in unsigned(63 downto 0);
+            -- seed_valid : in std_logic;
             Q : in unsigned (n_bits - 1 DOWNTO 0);
             B : out unsigned(n_bits - 1 DOWNTO 0));
            -- Done : out std_logic);
@@ -42,11 +42,8 @@ end genB;
 architecture Behavioral of genB is
 
     component row_mul_combinational is
-	   generic (
-		  mul_bits : natural := mul_bits
-		);
-	   Port ( A : in array_mul_t;
-            S : in array_mul_t;
+	   Port ( A : in array_t;
+            S : in array_t;
             result : out unsigned);
     end component;
 
@@ -57,13 +54,13 @@ architecture Behavioral of genB is
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
     end component;
 
-    type state_type is (S1, S2, S3);
+--    type state_type is (S1, S2, S3);
     signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
     signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
 
     -- Temporary signals for conversion
-    signal a_temp : array_mul_t(0 to a_width - 1);
-	signal s_temp : array_mul_t(0 to a_width - 1);
+--    signal a_temp : array_mul_t(0 to a_width - 1);
+--	signal s_temp : array_mul_t(0 to a_width - 1);
 
     signal temp : integer;
 
@@ -72,21 +69,21 @@ begin
 
 
     -- Conversion from array_t to array_mul_t using resize()
-array_conversion : for i in 0 to a_width - 1 generate
-    a_temp(i) <= resize(A(i), mul_bits);
-    s_temp(i) <= resize(S(i), mul_bits);
-end generate;
+--array_conversion : for i in 0 to a_width - 1 generate
+--    a_temp(i) <= resize(A(i), mul_bits);
+--    s_temp(i) <= resize(S(i), mul_bits);
+--end generate;
 
 
 
 row_mul: row_mul_combinational port map (
-        A => a_temp,
-        S => s_temp,
-        result =>  modulus_input);
+        A => A,
+        S => S,
+        result => modulus_input);
 
 
 modu: modulus_combinational port map(
-        Dividend => modulus_input,
+        Dividend => signed(modulus_input),
         Divisor => Q,
         Modulo => B);
 

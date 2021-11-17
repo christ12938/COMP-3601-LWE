@@ -234,7 +234,7 @@ package body data_types is
 	begin
 		case CONFIG is
 		when 1 => return 7;
-		when 2 => return 12;
+		when 2 => return 13;
 		when 3 => return 18;
 		when others => return n_bits;
 		end case;
@@ -243,8 +243,8 @@ package body data_types is
 	function mE return natural is
  	begin
 		case CONFIG is
-		when 1 => return 11;
-		when 2 => return 15;
+		when 1 => return 9;
+		when 2 => return 19;
 		when 3 => return 23;
 		when others => return n_bits;
 		end case;
@@ -254,7 +254,7 @@ package body data_types is
 	begin
 		case CONFIG is
 		when 1 => return 15;
---		when 2 => return 27;
+		when 2 => return 27;
 --		when 3 => return 33;
 		when others => return 15;
 --		 return n_bits;

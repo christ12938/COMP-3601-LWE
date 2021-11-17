@@ -52,7 +52,7 @@ architecture behavioural of key_generation is
 			clock : in std_logic;
 			reset : std_logic;
 			seed : in unsigned(63 downto 0);
-			seed_valid : in std_logic;
+--			seed_valid : in std_logic;
 			random_prime : out unsigned(n_bits - 1 downto 0)
 		);
 	end component;
@@ -61,8 +61,8 @@ architecture behavioural of key_generation is
 		port (
 			--clock, reset, start : in std_logic;
 			A, S : in array_t(0 to a_width - 1);
-			seed : in unsigned(63 downto 0);
-			seed_valid : in std_logic;
+			-- seed : in unsigned(63 downto 0);
+			-- seed_valid : in std_logic;
 			Q : in unsigned(n_bits - 1 downto 0);
 			B : out unsigned(n_bits - 1 downto 0)
 			--done : out std_logic
@@ -78,9 +78,9 @@ architecture behavioural of key_generation is
 	-- end component;
 
 	-- Seed generation signals
-	signal rng_bank_seed_valid : std_logic_vector(0 to a_width - 1) := (others => '0');
-	signal gen_q_seed_valid, gen_b_seed_valid : std_logic := '0';
-	signal seed_gen_out : unsigned(31 downto 0);
+--	signal rng_bank_seed_valid : std_logic_vector(0 to a_width - 1) := (others => '0');
+--	signal gen_q_seed_valid, gen_b_seed_valid : std_logic := '0';
+--	signal seed_gen_out : unsigned(31 downto 0);
 	-- Number of random number generators that need seeding
 	-- +2 for gen_q and gen_b
 	constant NUM_GENERATORS : positive := a_width + 2;
@@ -140,7 +140,7 @@ begin
 		reset => reset,
 		-- seed => seed_gen_out,
 		seed => SEEDS(16),
-		seed_valid => gen_q_seed_valid,
+--		seed_valid => gen_q_seed_valid,
 		random_prime => q_out
 	);
 
@@ -179,8 +179,8 @@ begin
 		--Clock => clock,
 		--Reset => reset,
 		--Start => gen_b_start,
-		seed => SEEDS(17),
-		seed_valid => gen_b_seed_valid,
+--		seed => SEEDS(17),
+--		seed_valid => gen_b_seed_valid,
 		A => a_in,
 		S => s_in,
 		Q => q_in,
@@ -221,20 +221,20 @@ begin
 	end process;
 
 	-- Counter for clocks taken by gen_b
-	count_c : process(clock, reset)
-		variable counter_c_variable : integer range 0 to b_height := 0;
-	begin
-		if reset = '1' then
-			counter_c_variable := 0;
-		elsif rising_edge(clock) then
-			if counter_c_reset_synchronous = '1' then
-				counter_c_variable := 0;
-			elsif counter_c_enable = '1' then
-				counter_c_variable := counter_c_variable + 1;
-			end if;
-		end if;
-		counter_c <= counter_c_variable;
-	end process;
+	-- count_c : process(clock, reset)
+	-- 	variable counter_c_variable : integer range 0 to b_height := 0;
+	-- begin
+	-- 	if reset = '1' then
+	-- 		counter_c_variable := 0;
+	-- 	elsif rising_edge(clock) then
+	-- 		if counter_c_reset_synchronous = '1' then
+	-- 			counter_c_variable := 0;
+	-- 		elsif counter_c_enable = '1' then
+	-- 			counter_c_variable := counter_c_variable + 1;
+	-- 		end if;
+	-- 	end if;
+	-- 	counter_c <= counter_c_variable;
+	-- end process;
 
 	a_bram_address <= to_unsigned(counter_a, a_bram_address'length);
 	b_bram_address <= to_unsigned(counter_b, b_bram_address'length);
@@ -254,14 +254,14 @@ begin
 
 		counter_a_enable <= '0';
 		counter_b_enable <= '0';
-		counter_c_enable <= '0';
+		-- counter_c_enable <= '0';
 		counter_a_reset_synchronous <= '0';
 		counter_b_reset_synchronous <= '0';
-		counter_c_reset_synchronous <= '0';
+		-- counter_c_reset_synchronous <= '0';
 
-		gen_q_seed_valid <= '0';
-		gen_b_seed_valid <= '0';
-		rng_bank_seed_valid <= (others => '0');
+--		gen_q_seed_valid <= '0';
+--		gen_b_seed_valid <= '0';
+--		rng_bank_seed_valid <= (others => '0');
 
 		case current_state is
 		when s_idle =>
@@ -293,45 +293,57 @@ begin
 				-- Ready the counters for the next state
 				counter_a_reset_synchronous <= '1';
 				counter_b_reset_synchronous <= '1';
-				counter_c_reset_synchronous <= '1';
+				-- counter_c_reset_synchronous <= '1';
 			else
 				counter_a_enable <= '1';
 			end if;
 
 		when s_gen_b_wait =>
-			-- 1 clock cycle to wait for the block RAM A to have the right output ready
-			-- Just use counter c
-			counter_c_enable <= '1';
-			if counter_c = BLOCK_RAM_DELAY - 1 then
-				-- If it's been 2 clock cycles, move on
-				counter_c_reset_synchronous <= '1';
-				next_state <= s_gen_b_work;
-			end if;
+			next_state <= s_gen_b_work;
+			counter_a_enable <= '1';
+			-- -- 1 clock cycle to wait for the block RAM A to have the right output ready
+			-- -- Just use counter c
+			-- counter_c_enable <= '1';
+			-- if counter_c = BLOCK_RAM_DELAY - 1 then
+			-- 	-- If it's been 1 clock cycles, move on
+			-- 	counter_c_reset_synchronous <= '1';
+			-- end if;
 
 		when s_gen_b_work =>
-			gen_b_start <= '1';
-			counter_c_enable <= '1';
+			counter_a_enable <= '1';
+			counter_b_enable <= '1';
+			b_valid <= '1';
 
-			if counter_b = b_height - 1 and counter_c = GEN_B_CLOCKS - 1 then
-				-- Everything is done
-				next_state <= s_finished;
 
+			if counter_b = a_height then
 				counter_a_reset_synchronous <= '1';
 				counter_b_reset_synchronous <= '1';
-				counter_c_reset_synchronous <= '1';
+				next_state <= s_finished;
 			end if;
 
-			if counter_c = GEN_B_CLOCKS - 1 then
-				-- gen_b has done a full cycle
-				counter_b_enable <= '1';
-				counter_c_reset_synchronous <= '1';
-				b_valid <= '1';
-			end if;
+			-- gen_b_start <= '1';
+			-- counter_c_enable <= '1';
 
-			if counter_c = GEN_B_CLOCKS - 1 - BLOCK_RAM_DELAY then
-				-- Pre-emptively increment the A block RAM address 1 clock before gen_b is expected to finish (because the block RAM takes 1 clock to update)
-				counter_a_enable <= '1';
-			end if;
+			-- if counter_b = b_height - 1 and counter_c = GEN_B_CLOCKS - 1 then
+			-- 	-- Everything is done
+			-- 	next_state <= s_finished;
+
+			-- 	counter_a_reset_synchronous <= '1';
+			-- 	counter_b_reset_synchronous <= '1';
+			-- 	counter_c_reset_synchronous <= '1';
+			-- end if;
+
+			-- if counter_c = GEN_B_CLOCKS - 1 then
+			-- 	-- gen_b has done a full cycle
+			-- 	counter_b_enable <= '1';
+			-- 	counter_c_reset_synchronous <= '1';
+			-- 	b_valid <= '1';
+			-- end if;
+
+			-- if counter_c = GEN_B_CLOCKS - 1 - BLOCK_RAM_DELAY then
+			-- 	-- Pre-emptively increment the A block RAM address 1 clock before gen_b is expected to finish (because the block RAM takes 1 clock to update)
+			-- 	counter_a_enable <= '1';
+			-- end if;
 
 		when s_finished =>
 			done <= '1';

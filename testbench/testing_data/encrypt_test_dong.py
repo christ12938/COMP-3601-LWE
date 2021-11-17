@@ -8,12 +8,20 @@ The above will run the test on
 """
 import sys
 
-Q: int = 3347
-A_WIDTH: int = 8
-A_HEIGHT: int = 8192
+FILE_NAME : str = "data2/encryption_v2_debug_bit_"
 
-FILE_NAME : str = "data0/encryption_v2_debug_bit_"
-# FILE_NAME : str = "config3_0/encryption_v2_debug_bit_"
+# Config 1
+Q: int = 97
+A_WIDTH: int = 4
+A_HEIGHT: int = 256
+
+# Config 2
+# Q: int = 3347
+# A_WIDTH: int = 8
+# A_HEIGHT: int = 8192
+
+
+# Config 3
 # A_HEIGHT : int = 32768
 # A_WIDTH : int = 16
 # Q : int = 35879

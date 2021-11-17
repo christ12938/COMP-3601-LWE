@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 11/16/2021 04:58:20 PM
--- Design Name: 
+-- Design Name:
 -- Module Name: log_deltas - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -174,6 +174,7 @@ begin
         when "1111101" => delta <= "000000011010010";
         when "1111110" => delta <= "000000010001101";
         when "1111111" => delta <= "000000001000110";
+
         when others => delta <= "000000000000000";
     end case;
 end process;
