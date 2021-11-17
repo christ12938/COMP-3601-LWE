@@ -18,13 +18,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.data_types.all;
 
-entity log is
+entity log_v2 is
 		port ( input : in std_logic_vector(n_bits - 1 downto 0);
 					 res : out integer range 0 to n_bits - 1);
-end log;
+end log_v2;
 
 
-architecture behavioral of log is
+architecture behavioral of log_v2 is
 
 begin
 	-- This is essentially a priority encoder with the MSB taking priority

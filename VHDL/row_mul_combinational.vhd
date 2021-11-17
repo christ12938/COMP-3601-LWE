@@ -20,68 +20,53 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.data_types.all;
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
--- import approximate multiplier and replace the multiplier with approximate multiplier
--- the current approximate multiplier will work for 8 bit integers
 entity row_mul_combinational is
 	generic (
 		mul_bits : natural := mul_bits
 		);
-	Port ( A : in array_mul_t;
-           S : in array_mul_t;
+	Port ( A : in array_mul_t(0 to a_width - 1);
+           S : in array_mul_t(0 to a_width - 1);
           --  reset, start : in std_logic;
-           result : out unsigned);
+           result : out unsigned(mul_bits - 1 downto 0));
 end row_mul_combinational;
-
 architecture Behavioral of row_mul_combinational is
 
+component approx_multiplier_combinational is
+    Port (
+           input_a : in unsigned(n_bits-1 downto 0) ;
+           input_b : in unsigned(n_bits -1 downto 0);
+           output   : out unsigned (mul_bits - 1 downto 0));
+end component;
 
-component  dgn_mitchellmul8bit is  generic (
-		  sz : natural := 16
-		);
-		 Port ( X : in std_logic_vector(sz-1 downto 0);
-            Y : in std_logic_vector(sz-1 downto 0);
-            M : out  std_logic_vector(2*sz-1 downto 0));
-    end component;
+signal input_a: unsigned(n_bits-1 downto 0);
+signal input_b: unsigned(n_bits-1 downto 0);
+signal res: unsigned (mul_bits - 1 downto 0);
 
-signal appr_mul_res : std_logic_vector(31 downto 0);
-signal mul1 : std_logic_vector(15 downto 0);
-signal mul2 : std_logic_vector (15 downto 0) ;
 begin
 
-  approximate_multiplier: dgn_mitchellmul8bit 
-        generic map (sz => 16)
-        port map ( 
-            X => mul1,
-            Y => mul2, 
-            M => appr_mul_res);
-            
+  approx_multiply: approx_multiplier_combinational port map (
+    input_a => input_a,
+    input_b => input_b,
+    output => res
+  );
+
   p_IMAGE : process(A, S)
-    variable productTemp : unsigned( mul_bits - 1 downto 0);
-    variable sumTemp : unsigned ( mul_bits - 1 downto 0);
+    variable productTemp : unsigned(2 * mul_bits - 1 downto 0);
+    variable sumTemp : unsigned(mul_bits - 1 downto 0);
 --    variable productTemp : integer := 0;
 --    variable sumTemp : integer := 0;
   begin
-   
-
-    productTemp := TO_UNSIGNED(0, mul_bits);
-    sumTemp := TO_UNSIGNED(0, mul_bits);
-    for ii in 0 to a_width - 1 loop
-    
-       mul1 <= std_logic_vector(A(ii));
-       mul2 <= std_logic_vector(S(ii));
-        
-      productTemp := TO_UNSIGNED(TO_INTEGER(A(ii)) * TO_INTEGER(S(ii)), mul_bits);
+    productTemp := TO_UNSIGNED(0, productTemp'length);
+    sumTemp := TO_UNSIGNED(0, sumTemp'length);
+    for ii in 0 to (a_width - 1) loop
+      input_a <= A(ii);
+      input_b <= S(ii);
+      productTemp := res;
+--      A(ii) * S(ii);
 --        productTemp := A(ii)*S(ii);
-      sumTemp := sumTemp + To_Integer(UNSIGNED(appr_mul_res));
---      sumTemp + productTemp;
+      sumTemp := sumTemp + resize(productTemp, sumTemp'length);
       -- report ("COL = "  & natural'image(ii) & " A(ii)="& integer'image(TO_INTEGER(A(ii))) & " S(ii)="& integer'image(TO_INTEGER(S(ii))) &
               -- " SUM = " & integer'image(TO_INTEGER(sumTemp)) & " PRODUCT = " & integer'image(TO_INTEGER(productTemp))) severity note;
     end loop;

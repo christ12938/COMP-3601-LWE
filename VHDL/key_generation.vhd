@@ -59,13 +59,13 @@ architecture behavioural of key_generation is
 
 	component genB is
 		port (
-			clock, reset, start : in std_logic;
+			--clock, reset, start : in std_logic;
 			A, S : in array_t(0 to a_width - 1);
 			seed : in unsigned(63 downto 0);
 			seed_valid : in std_logic;
 			Q : in unsigned(n_bits - 1 downto 0);
-			B : out unsigned(n_bits - 1 downto 0);
-			done : out std_logic
+			B : out unsigned(n_bits - 1 downto 0)
+			--done : out std_logic
 		);
 	end component;
 
@@ -117,7 +117,7 @@ architecture behavioural of key_generation is
 	signal counter_b_reset_synchronous : std_logic := '0';
 
 	-- Counter to count how many clocks gen_b is taking
-	constant GEN_B_CLOCKS : positive := 5;
+	constant GEN_B_CLOCKS : positive := 12;
 	signal counter_c_enable : std_logic := '0';
 	signal counter_c : integer range 0 to GEN_B_CLOCKS := 0;
 	signal counter_c_reset_synchronous : std_logic := '0';
@@ -144,15 +144,17 @@ begin
 		random_prime => q_out
 	);
 
+	-- q_out <= to_unsigned(127, q_out'length);
+
 	-- Generate a_width generators, these generators are used for A and s
 	rng_bank : for i in 0 to a_width - 1 generate
 		rng : uniform_rng
 		port map (
 			-- seed => std_logic_vector(seed_gen_out),
 			seed => std_logic_vector(SEEDS(i)),
-			cap => std_logic_vector(to_unsigned(max_q, n_bits)),
+			cap => std_logic_vector(q_in),
 			clk => clock,
-			reset => reset or rng_bank_seed_valid(i),
+			reset => reset,
 			unsigned(random_number) => rng_out(i),
 			start_signal => '1'
 		);
@@ -174,16 +176,16 @@ begin
 	-- Vector B generation module
 	gen_b : genB
 	port map (
-		Clock => clock,
-		Reset => reset,
-		Start => gen_b_start,
+		--Clock => clock,
+		--Reset => reset,
+		--Start => gen_b_start,
 		seed => SEEDS(17),
 		seed_valid => gen_b_seed_valid,
 		A => a_in,
 		S => s_in,
 		Q => q_in,
-		B => b_out,
-		Done => gen_b_done
+		B => b_out
+		--Done => gen_b_done
 	);
 
 	-- Counter for matrix A height

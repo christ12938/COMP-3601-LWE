@@ -27,7 +27,7 @@ architecture behavioural of lwe_tb is
 		);
 	end component;
 
-	constant CLOCK_PERIOD : time := 100 ns;
+	constant CLOCK_PERIOD : time := 1 ns;
 
 	-- -------------------------------- Signals -----------------------------------
 	signal clock : std_logic := '0';
@@ -44,7 +44,7 @@ architecture behavioural of lwe_tb is
 	begin
 		file_open(file_pointer, file_name, write_mode);
 		file_close(file_pointer);
-  end;
+	end;
 
 begin
 	clock <= not clock after CLOCK_PERIOD / 2;
@@ -145,7 +145,7 @@ begin
 					-- Save the plaintext out bit to build an ASCII byte
 					byte_vector_out(i) := plaintext_out;
 
-					wait for 4 * CLOCK_PERIOD;
+					wait for 1 * CLOCK_PERIOD;
 
 				end loop;
 
