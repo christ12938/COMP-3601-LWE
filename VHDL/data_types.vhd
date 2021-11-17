@@ -16,7 +16,7 @@ package data_types is
 
 	-- CONFIG can be 1, 2, or 3
 	-- Corresponds to the configurations in the project spec
-	constant CONFIG : natural := 3;
+	constant CONFIG : natural := 2;
 
 	-- Depending on CONFIG, these functions/constants will return the correct sizes
 	function a_width return natural;	-- Width of matrix A

@@ -12,7 +12,7 @@ Q: int = 3347
 A_WIDTH: int = 8
 A_HEIGHT: int = 8192
 
-FILE_NAME : str = "config2/encryption_v2_debug_bit_"
+FILE_NAME : str = "data0/encryption_v2_debug_bit_"
 # FILE_NAME : str = "config3_0/encryption_v2_debug_bit_"
 # A_HEIGHT : int = 32768
 # A_WIDTH : int = 16

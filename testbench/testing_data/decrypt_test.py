@@ -2,22 +2,22 @@ import sys
 
 
 # Config 2
-# Q: int = 3347
-# A_WIDTH: int = 8
-# A_HEIGHT: int = 8192
-# S: list = [4701, 3470, 4496, 664, 6247, 8187, 4998, 3116]
-# FILE_NAME : str = "config2/encryption_v2_debug_bit_"
+Q: int = 3347
+A_WIDTH: int = 8
+A_HEIGHT: int = 8192
+S: list = [2439, 2796, 2369, 977, 1959, 2756, 2046, 722]
+FILE_NAME : str = "data0/encryption_v2_debug_bit_"
 
 
 # Config 3
-FILE_NAME : str = "config3_0/encryption_v2_debug_bit_"
-A_HEIGHT : int = 32768
-A_WIDTH : int = 16
-Q : int = 35879
-# S : list = [11660, 25516, 56130, 6196, 47329, 61026, 5759, 42909, 38708, 27503, 6512, 38187, 45894, 16844, 43821, 19374] # old
-S: list = [31906, 24068, 33371, 13914, 31096, 22534, 16570, 1563, 15420, 11907, 12533, 15122, 22317, 20355, 24102, 16798]
+# FILE_NAME : str = "config3_0/encryption_v2_debug_bit_"
+# A_HEIGHT : int = 32768
+# A_WIDTH : int = 16
+# Q : int = 35879
+# # S : list = [11660, 25516, 56130, 6196, 47329, 61026, 5759, 42909, 38708, 27503, 6512, 38187, 45894, 16844, 43821, 19374] # old
+# S: list = [31906, 24068, 33371, 13914, 31096, 22534, 16570, 1563, 15420, 11907, 12533, 15122, 22317, 20355, 24102, 16798]
 
-DEBUG = True
+DEBUG = False
 
 def main():
     if len(sys.argv) != 2:

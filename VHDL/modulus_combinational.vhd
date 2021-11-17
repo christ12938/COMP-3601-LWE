@@ -21,7 +21,9 @@ ARCHITECTURE Behavior OF modulus_combinational IS
 BEGIN
 	-- We can use the built in MOD for config 1 and 2
 	config_1_2_generate : if CONFIG = 1 or CONFIG = 2 generate
-		modulo <= to_unsigned(to_integer(Dividend) mod to_integer(Divisor), modulo'length);
+		modulo <=
+			to_unsigned(0, modulo'length) when to_integer(Divisor) = 0 else
+			to_unsigned(to_integer(Dividend) mod to_integer(Divisor), modulo'length);
 	end generate;
 
 	-- We have to do mod manually for config 3 because integers overflow and SIGNED MOD doesn't work properly
