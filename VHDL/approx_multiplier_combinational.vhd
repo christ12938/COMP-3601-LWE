@@ -19,7 +19,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 
 entity approx_multiplier_combinational is
-    Port ( --clk : in STD_LOGIC;
+    Port ( clock : in STD_LOGIC;
            --reset : in STD_LOGIC;
            --start : in STD_LOGIC;
            input_a : in unsigned(n_bits-1 downto 0) ;
@@ -31,9 +31,9 @@ end approx_multiplier_combinational;
 
 architecture Behavioral of approx_multiplier_combinational is
 
-component ecLog
-
+    component ecLog is
     Port ( input : in UNSIGNED(n_bits - 1 downto 0);
+        clock : in std_logic;
           --delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
          --  k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(3+ k_trunc downto 0)   -- how should we return the output ? what is the size of the output after trunctuation
@@ -45,6 +45,7 @@ component ecLog
 
     component ecExp is port (
             input : in UNSIGNED(4+ k_trunc  downto 0);
+            clock : in std_logic;
            --delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
           -- k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(mul_bits - 1 downto 0));
@@ -76,27 +77,27 @@ begin
         temp;
 
     aLog: ecLog port map (
-
-                                input  => input_a,
-                                --delta   => delta_log_A,
-                                -- k => k,            -- how are we getting this
-                                res => approx_log_A);  -- why it's "u" ?
+        clock => clock,
+        input  => input_a,
+        --delta   => delta_log_A,
+        -- k => k,            -- how are we getting this
+        res => approx_log_A);  -- why it's "u" ?
 
     bLog: ecLog port map (
-
-                                input  => input_b,
-                                --delta   => delta_log_B,
-                                --k => k,
-                                res => approx_log_B);
+        clock => clock,
+        input  => input_b,
+        --delta   => delta_log_B,
+        --k => k,
+        res => approx_log_B);
 
     -- + approx_log_B;
 
     ecExp_input <= RESIZE(approx_log_A,5+k_trunc) + RESIZE(approx_log_B, 5+k_trunc); --???
     -- get exp delta
     exp: ecExp port map (
-                            input => ecExp_input,
-
-                                res   => temp);
+        input => ecExp_input,
+        clock => clock,
+        res   => temp);
 
 
 end Behavioral;

@@ -32,9 +32,10 @@ architecture Behavioral of row_mul_combinational is
 
 component approx_multiplier_combinational is
 		Port (
-					 input_a : in unsigned(n_bits - 1 downto 0) ;
-					 input_b : in unsigned(n_bits - 1 downto 0);
-					 output   : out unsigned (mul_bits - 1 downto 0));
+					clock : in std_logic;
+					input_a : in unsigned(n_bits - 1 downto 0) ;
+					input_b : in unsigned(n_bits - 1 downto 0);
+					output   : out unsigned (mul_bits - 1 downto 0));
 end component;
 	constant NUM_MULS : positive := a_width;
 	-- signal input_a: unsigned(n_bits-1 downto 0);
@@ -53,7 +54,8 @@ begin
 			approx_multiply: approx_multiplier_combinational port map (
 				input_a => A(i),
 				input_b => S(i),
-				output => res(i)
+				output => res(i),
+				clock => '0'
 			);
 			debug_actual(i) <= resize(A(i) * S(i), res(i)'length);
 			debug_diff(i) <= signed(debug_actual(i)) - signed(res(i));

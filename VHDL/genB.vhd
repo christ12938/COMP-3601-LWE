@@ -30,62 +30,91 @@ use work.data_types.ALL;
 --use UNISIM.VComponents.all;
 
 entity genB is
-    Port(   --Clock, Reset, Start: in std_logic;
-            A, S : in array_t (0 to a_width-1);
-            -- seed : in unsigned(63 downto 0);
-            -- seed_valid : in std_logic;
-            Q : in unsigned (n_bits - 1 DOWNTO 0);
-            B : out unsigned(n_bits - 1 DOWNTO 0));
-           -- Done : out std_logic);
+	Port(
+		Clock, Reset, Start: in std_logic;
+		A, S : in array_t (0 to a_width-1);
+		-- seed : in unsigned(63 downto 0);
+		-- seed_valid : in std_logic;
+		Q : in unsigned (n_bits - 1 DOWNTO 0);
+		B : out unsigned(n_bits - 1 DOWNTO 0);
+		done : out std_logic
+	);
 end genB;
 
 architecture Behavioral of genB is
 
-    component row_mul_combinational is
+	component row_mul_combinational is
 	   Port ( A : in array_t;
-            S : in array_t;
-            result : out unsigned);
-    end component;
+			S : in array_t;
+			result : out unsigned);
+	end component;
 
-    component modulus_combinational is
+	component row_mul is
+		Port (
+			A, S : in array_t(0 to a_width - 1);
+			reset, start, clock : in std_logic;
+			done : out std_logic;
+			result : out unsigned(mul_bits - 1 downto 0)
+		);
+	end component;
+
+	component modulus_combinational is
 	   Port(
 			Dividend                : IN		SIGNED(mul_bits - 1 DOWNTO 0);
 			Divisor		            : IN		UNSIGNED(n_bits - 1 DOWNTO 0);
 			Modulo               : OUT       UNSIGNED(n_bits - 1 DOWNTO 0));
-    end component;
+	end component;
 
 --    type state_type is (S1, S2, S3);
-    signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
-    signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
+	signal modulus_input: unsigned(mul_bits - 1 DOWNTO 0);
+	signal rowMul_result : unsigned(mul_bits - 1 DOWNTO 0);
 
-    -- Temporary signals for conversion
+	-- Temporary signals for conversion
 --    signal a_temp : array_mul_t(0 to a_width - 1);
 --	signal s_temp : array_mul_t(0 to a_width - 1);
 
-    signal temp : integer;
+	signal temp : integer;
+	-- signal done : std_logic;
 
 begin
-    temp <= error_range;
 
 
-    -- Conversion from array_t to array_mul_t using resize()
+	temp <= error_range;
+	-- done <=
+
+	-- Conversion from array_t to array_mul_t using resize()
 --array_conversion : for i in 0 to a_width - 1 generate
 --    a_temp(i) <= resize(A(i), mul_bits);
 --    s_temp(i) <= resize(S(i), mul_bits);
 --end generate;
 
 
+	config_1_gen : if CONFIG = 1 generate
+		row_mul_config_1 : row_mul_combinational port map (
+			A => A,
+			S => S,
+			result => modulus_input
+		);
+	end generate;
 
-row_mul: row_mul_combinational port map (
-        A => A,
-        S => S,
-        result => modulus_input);
+	config_2_gen : if CONFIG = 2 generate
+		row_mul_config_2 : row_mul port map (
+			A => A,
+			S => S,
+			reset => reset,
+			start => start,
+			done => done,
+			clock => clock,
+			result => modulus_input
+		);
+	end generate;
 
 
-modu: modulus_combinational port map(
-        Dividend => signed(modulus_input),
-        Divisor => Q,
-        Modulo => B);
+	modu: modulus_combinational port map(
+		Dividend => signed(modulus_input),
+		Divisor => Q,
+		Modulo => B
+	);
 
 
 end Behavioral;

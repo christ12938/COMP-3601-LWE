@@ -25,9 +25,12 @@ use IEEE.Numeric_Std.all;
 USE WORK.DATA_TYPES.ALL;
 
 entity ecExp is
-    Port ( input : in UNSIGNED(4+ k_trunc  downto 0);
-           --delta:  in UNSIGNED(k_trunc -1 downto 0);
-           res :   out UNSIGNED(mul_bits -1 downto 0));
+    Port (
+        input : in UNSIGNED(4+ k_trunc  downto 0);
+        clock : in std_logic;
+        --delta:  in UNSIGNED(k_trunc -1 downto 0);
+        res :   out UNSIGNED(mul_bits -1 downto 0)
+    );
 end ecExp;
 
 architecture Behavioral of ecExp is
@@ -46,16 +49,38 @@ architecture Behavioral of ecExp is
     component exp_deltas is
         Port (frac : in unsigned(mE - 1 downto 0);
             delta : out unsigned(k_trunc-1 downto 0));
-    end component ;
+    end component;
 
+    component exp_deltas_config_2 is
+    port (
+        clka : in std_logic;
+        addra : in std_logic_vector(mE - 1 downto 0);
+        douta : out std_logic_vector(k_trunc - 1 downto 0)
+    );
+	end component;
+
+	signal not_clock : std_logic;
 begin
+	not_clock <= not clock;
 
     int <= input(4+ k_trunc downto k_trunc);
     frac <= resize('1' & input(k_trunc-1 downto 0),k_trunc + 1);
 
-    get_delta: exp_deltas port map (frac => frac(k_trunc - 1 downto k_trunc - mE),
-                                    delta => delta);
-                                    
+   get_deltas_config_1 : if CONFIG = 1 generate
+       get_delta_1 : exp_deltas port map (
+           frac => frac(k_trunc - 1 downto k_trunc - mE),
+           delta => delta
+       );
+   end generate;
+
+    get_deltas_config_2 : if CONFIG = 2 generate
+        get_delta_2 : exp_deltas_config_2 port map (
+            clka => not_clock,
+            addra => std_logic_vector(frac(k_trunc - 1 downto k_trunc - mE)),
+            unsigned(douta) => delta
+        );
+    end generate;
+
     substracted <= frac - ('0' & delta);
 
     round <= substracted(k_trunc-TO_INTEGER(int)-1);

@@ -18,7 +18,7 @@ end register_async_reset;
 
 architecture behaviour of register_async_reset is
 begin
-	process(clock) begin
+	process(clock, reset) begin
 		if reset = '1' then
 			q <= (others => '0');
 		elsif rising_edge(clock) and e = '1' then

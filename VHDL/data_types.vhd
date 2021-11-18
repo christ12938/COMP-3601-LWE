@@ -244,7 +244,7 @@ package body data_types is
  	begin
 		case CONFIG is
 		when 1 => return 9;
-		when 2 => return 19;
+		when 2 => return 18;
 		when 3 => return 23;
 		when others => return n_bits;
 		end case;

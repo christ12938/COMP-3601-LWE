@@ -59,7 +59,7 @@ architecture behavioural of key_generation is
 
 	component genB is
 		port (
-			--clock, reset, start : in std_logic;
+			clock, reset, start : in std_logic;
 			A, S : in array_t(0 to a_width - 1);
 			-- seed : in unsigned(63 downto 0);
 			-- seed_valid : in std_logic;
@@ -121,16 +121,9 @@ architecture behavioural of key_generation is
 	signal counter_c_enable : std_logic := '0';
 	signal counter_c : integer range 0 to GEN_B_CLOCKS := 0;
 	signal counter_c_reset_synchronous : std_logic := '0';
+
 begin
-	-- Seed generation
-	-- seed_gen : seed_generator
-	-- port map (
-	-- 	master_seed => MASTER_SEED,
-	-- 	clock => clock,
-	-- 	reset => reset,
-	-- 	start => '1',
-	-- 	random_number => seed_gen_out
-	-- );
+
 
 
 	-- Prime generation
@@ -176,6 +169,9 @@ begin
 	-- Vector B generation module
 	gen_b : genB
 	port map (
+		clock => '0',
+		reset => '0',
+		start => '0',
 		--Clock => clock,
 		--Reset => reset,
 		--Start => gen_b_start,
@@ -240,8 +236,7 @@ begin
 	b_bram_address <= to_unsigned(counter_b, b_bram_address'length);
 
 	-- State outputs
-	process(clock, current_state, start, counter_a, counter_b, counter_c)
-	begin
+	process(clock, current_state, start, counter_a, counter_b, counter_c) begin
 
 		-- Default behaviours
 		next_state <= current_state;

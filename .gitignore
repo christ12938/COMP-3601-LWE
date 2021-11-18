@@ -27,3 +27,8 @@ VHDL/block_rams/primes_config_2/*
 !VHDL/block_rams/primes_config_2/*.xci
 VHDL/block_rams/primes_config_3/*
 !VHDL/block_rams/primes_config_3/*.xci
+
+VHDL/block_rams/exp_deltas_config_2/*
+!VHDL/block_rams/exp_deltas_config_2/*.xci
+VHDL/block_rams/log_deltas_config_2/*
+!VHDL/block_rams/log_deltas_config_2/*.xci

@@ -57,6 +57,35 @@ architecture behavioural of lwe is
 			s_valid : out std_logic
 		);
 	end component;
+	component key_generation_t2c2 is
+		port (
+			reset : in std_logic;
+			clock : in std_logic;
+
+			-- Starts the state machine
+			start : in std_logic;
+
+			a_in : in array_t(0 to a_width - 1);
+			q_in : in unsigned(n_bits - 1 downto 0);
+			s_in : in array_t(0 to s_height - 1);
+
+			-- Asserts when the state machine is finished
+			done : out std_logic;
+
+			-- Block RAM addresses
+			a_bram_address : out unsigned(a_bram_address_width - 1 downto 0);
+			b_bram_address : out unsigned(b_bram_address_width - 1 downto 0);
+
+			q_out : out unsigned(n_bits - 1 downto 0);
+			q_valid : out std_logic;
+			a_out : out array_t(0 to a_width - 1);
+			a_valid : out std_logic;
+			b_out : out unsigned(n_bits - 1 downto 0);
+			b_valid : out std_logic;
+			s_out : out array_t(0 to s_height - 1);
+			s_valid : out std_logic
+		);
+	end component;
 
 	-- ------------------------------- Decryption ---------------------------------
 	component decrypt is
@@ -364,26 +393,51 @@ begin
 
 	b_bram_write_enable <= b_valid;
 
-	key_gen : key_generation
-	port map (
-		clock => clock_a,
-		reset => reset,
-		start => start,
-		a_in => a_bram_data_out_array,
-		q_in => q_reg_out,
-		s_in => s_reg_out,
-		done => key_generation_done,
-		q_out => q_reg_in,
-		a_out => a_bram_data_in_array,
-		b_out => b_bram_data_in,
-		s_out => s_reg_in,
-		q_valid => q_valid,
-		a_valid => a_valid,
-		b_valid => b_valid,
-		s_valid => s_valid,
-		a_bram_address => a_bram_address_key_gen,
-		b_bram_address => b_bram_address_key_gen
-	);
+	config_1_key_gen : if CONFIG = 1 generate
+		key_gen : key_generation
+		port map (
+			clock => clock_a,
+			reset => reset,
+			start => start,
+			a_in => a_bram_data_out_array,
+			q_in => q_reg_out,
+			s_in => s_reg_out,
+			done => key_generation_done,
+			q_out => q_reg_in,
+			a_out => a_bram_data_in_array,
+			b_out => b_bram_data_in,
+			s_out => s_reg_in,
+			q_valid => q_valid,
+			a_valid => a_valid,
+			b_valid => b_valid,
+			s_valid => s_valid,
+			a_bram_address => a_bram_address_key_gen,
+			b_bram_address => b_bram_address_key_gen
+		);
+	end generate;
+
+	config_2_key_gen : if CONFIG = 2 generate
+		key_gen : key_generation_t2c2
+		port map (
+			clock => clock_a,
+			reset => reset,
+			start => start,
+			a_in => a_bram_data_out_array,
+			q_in => q_reg_out,
+			s_in => s_reg_out,
+			done => key_generation_done,
+			q_out => q_reg_in,
+			a_out => a_bram_data_in_array,
+			b_out => b_bram_data_in,
+			s_out => s_reg_in,
+			q_valid => q_valid,
+			a_valid => a_valid,
+			b_valid => b_valid,
+			s_valid => s_valid,
+			a_bram_address => a_bram_address_key_gen,
+			b_bram_address => b_bram_address_key_gen
+		);
+	end generate;
 
 	-- encryption : encryptor
 	-- port map (
