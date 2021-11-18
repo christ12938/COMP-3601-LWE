@@ -25,7 +25,7 @@ use IEEE.Numeric_Std.all;
 USE WORK.DATA_TYPES.ALL;
 
 entity ecExp is
-    Port ( input : in UNSIGNED(3+ k_trunc  downto 0);
+    Port ( input : in UNSIGNED(4+ k_trunc  downto 0);
            --delta:  in UNSIGNED(k_trunc -1 downto 0);
            res :   out UNSIGNED(mul_bits -1 downto 0));
 end ecExp;
@@ -34,7 +34,7 @@ architecture Behavioral of ecExp is
 
     signal frac : unsigned(k_trunc  downto 0);
     signal substracted : unsigned(k_trunc downto 0);
-    signal int : unsigned(3 downto 0) := "0000";
+    signal int : unsigned(4 downto 0) := "00000";
     --signal precise_output : unsigned(n_bits-1 downto 0);
     signal delta: UNSIGNED(k_trunc -1 downto 0);
     signal padding : UNSIGNED(k_trunc - 1 downto 0) := (others => '0');
@@ -50,11 +50,12 @@ architecture Behavioral of ecExp is
 
 begin
 
-    int <= input(3+ k_trunc downto k_trunc);
+    int <= input(4+ k_trunc downto k_trunc);
     frac <= resize('1' & input(k_trunc-1 downto 0),k_trunc + 1);
 
     get_delta: exp_deltas port map (frac => frac(k_trunc - 1 downto k_trunc - mE),
                                     delta => delta);
+                                    
     substracted <= frac - ('0' & delta);
 
     round <= substracted(k_trunc-TO_INTEGER(int)-1);

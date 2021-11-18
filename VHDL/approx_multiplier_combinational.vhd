@@ -44,7 +44,7 @@ component ecLog
 
 
     component ecExp is port (
-            input : in UNSIGNED(3+ k_trunc  downto 0);
+            input : in UNSIGNED(4+ k_trunc  downto 0);
            --delta:  in UNSIGNED(n_bits - 1 downto 0);       -- what is the size
           -- k       : in integer;                                    -- what is the range
            res :   out UNSIGNED(mul_bits - 1 downto 0));
@@ -62,7 +62,7 @@ component ecLog
     signal approx_log_A:    unsigned (3+ k_trunc downto 0);  -- max integer size: 4 --> 4 + k_trunc (size of frac)
     signal approx_log_B:    unsigned (3+ k_trunc downto 0);  -- max integer size: 4 --> 4 + k_trunc (size of frac)
 
-    signal ecExp_input : unsigned (3+ k_trunc downto 0);
+    signal ecExp_input : unsigned (4+ k_trunc downto 0);
     signal exp_output: unsigned (2*mul_bits -1 downto 0);
 
     signal temp : unsigned(mul_bits - 1 downto 0);
@@ -91,7 +91,7 @@ begin
 
     -- + approx_log_B;
 
-    ecExp_input <= approx_log_A + approx_log_B; --???
+    ecExp_input <= RESIZE(approx_log_A,5+k_trunc) + RESIZE(approx_log_B, 5+k_trunc); --???
     -- get exp delta
     exp: ecExp port map (
                             input => ecExp_input,
