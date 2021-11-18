@@ -64,7 +64,7 @@ begin
     -- end generate;
 
     condition_config_2 : if CONFIG = 2 generate
-        M <= '0' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '1';
+        M <= '1' when ((q / 4) <= dec and dec <= (3 * q / 4)) else '0';
     end generate;
 
     condition_config_3 : if CONFIG = 3 generate
